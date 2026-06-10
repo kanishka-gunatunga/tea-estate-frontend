@@ -112,7 +112,7 @@ export default function Login() {
               </label>
               <input
                 type="email"
-                placeholder="admin@teaestate.com"
+                placeholder="admin@gmail.com"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);

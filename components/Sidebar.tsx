@@ -101,7 +101,7 @@ export default function Sidebar({ activeView, profile }: SidebarProps) {
         <nav className="flex flex-col gap-1 px-2 py-[16px]">
           {/* Navigation item: Dashboard (defaults to estates view click) */}
           <Link
-            href="/dashboard/estates"
+            href="/dashboard"
             className={getButtonClass("dashboard")}
           >
             <LayoutGrid className={getIconClass("dashboard")} />

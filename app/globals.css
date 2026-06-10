@@ -24,3 +24,24 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/* Cohesive TV Dashboard theme-consistent green scrollbar */
+.tv-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.tv-scrollbar::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 9999px;
+}
+
+.tv-scrollbar::-webkit-scrollbar-thumb {
+  background: #00C950;
+  border-radius: 9999px;
+  border: 1px solid rgba(30, 41, 59, 0.4);
+}
+
+.tv-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00A63E;
+}

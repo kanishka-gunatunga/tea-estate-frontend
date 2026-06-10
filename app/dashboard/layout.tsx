@@ -10,6 +10,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
   // Map sub-route paths to Sidebar activeView enum values
   const resolveActiveView = () => {
+    if (pathname === "/dashboard") return "dashboard";
     if (pathname.includes("/dashboard/assignments")) return "assignments";
     if (pathname.includes("/dashboard/estates")) return "estates";
     if (pathname.includes("/dashboard/users")) return "users";
@@ -24,6 +25,15 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   };
 
   const activeView = resolveActiveView();
+
+  // TV View Fullscreen Override
+  if (pathname.includes("/dashboard/tv")) {
+    return (
+      <div className="h-screen w-full bg-[#030712] overflow-hidden select-none font-sans">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full bg-[#F9FAFB] overflow-hidden select-none font-sans">

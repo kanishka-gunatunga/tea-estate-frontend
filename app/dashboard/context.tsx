@@ -22,10 +22,13 @@ const INITIAL_ESTATES: Estate[] = [
     supervisor: "Carter Bator",
     status: "active",
     sections: [
-      { id: "sec-1", name: "Plantation A", area: 80, description: "North-facing hillside" },
-      { id: "sec-2", name: "Plantation B", area: 120, description: "Valley floor" },
-      { id: "sec-3", name: "Plantation C", area: 90, description: "South slope" },
-      { id: "sec-4", name: "Plantation D", area: 60, description: "Upper elevation" },
+      { id: "sec-1", name: "Central Grove", area: 80, description: "North-facing hillside" },
+      { id: "sec-2", name: "Section Beta", area: 120, description: "Valley floor" },
+      { id: "sec-3", name: "East Block", area: 90, description: "South slope" },
+      { id: "sec-4", name: "West Block", area: 60, description: "Upper elevation" },
+      { id: "sec-1-5", name: "Section Alpha", area: 70, description: "North boundary" },
+      { id: "sec-1-6", name: "Section Gamma", area: 65, description: "South boundary" },
+      { id: "sec-1-7", name: "North Hill", area: 50, description: "Upper terrace" },
     ],
   },
   {
@@ -175,7 +178,7 @@ const INITIAL_EMPLOYEES: Employee[] = [
     estateId: "estate-1",
     serviceCategories: ["Weeding", "Pruning", "Leaf Plucking"],
     nic: "453213234v",
-    status: "inactive",
+    status: "active",
   },
   {
     id: "EMP008",
@@ -185,6 +188,116 @@ const INITIAL_EMPLOYEES: Employee[] = [
     estateId: "estate-1",
     serviceCategories: ["Leaf Plucking"],
     nic: "453213234v",
+    status: "active",
+  },
+  {
+    id: "EMP009",
+    name: "Gihan Perera",
+    gender: "Male",
+    phone: "+94 77 999 0011",
+    estateId: "estate-1",
+    serviceCategories: ["Leaf Plucking"],
+    nic: "951234567v",
+    status: "active",
+  },
+  {
+    id: "EMP010",
+    name: "Nilanthi Silva",
+    gender: "Female",
+    phone: "+94 77 999 0022",
+    estateId: "estate-1",
+    serviceCategories: ["Fertilizing"],
+    nic: "961234567v",
+    status: "active",
+  },
+  {
+    id: "EMP011",
+    name: "Saman Kumara",
+    gender: "Male",
+    phone: "+94 77 999 0033",
+    estateId: "estate-1",
+    serviceCategories: ["Fertilizing"],
+    nic: "971234567v",
+    status: "active",
+  },
+  {
+    id: "EMP012",
+    name: "Ruwan Bandara",
+    gender: "Male",
+    phone: "+94 77 999 0044",
+    estateId: "estate-1",
+    serviceCategories: ["Fertilizing"],
+    nic: "981234567v",
+    status: "active",
+  },
+  {
+    id: "EMP013",
+    name: "Priyanka Fernando",
+    gender: "Female",
+    phone: "+94 77 999 0055",
+    estateId: "estate-1",
+    serviceCategories: ["Fertilizing"],
+    nic: "991234567v",
+    status: "active",
+  },
+  {
+    id: "EMP014",
+    name: "Dilrukshi Senanayake",
+    gender: "Female",
+    phone: "+94 77 999 0066",
+    estateId: "estate-1",
+    serviceCategories: ["Fertilizing"],
+    nic: "941234567v",
+    status: "active",
+  },
+  {
+    id: "EMP015",
+    name: "Kanishka Ranasinghe",
+    gender: "Male",
+    phone: "+94 77 999 0077",
+    estateId: "estate-1",
+    serviceCategories: ["Weeding"],
+    nic: "931234567v",
+    status: "active",
+  },
+  {
+    id: "EMP016",
+    name: "Udaya Karunaratne",
+    gender: "Male",
+    phone: "+94 77 999 0088",
+    estateId: "estate-1",
+    serviceCategories: ["Pruning"],
+    nic: "921234567v",
+    status: "active",
+  },
+  {
+    id: "EMP017",
+    name: "Manel Jayasinghe",
+    gender: "Female",
+    phone: "+94 77 999 0099",
+    estateId: "estate-1",
+    serviceCategories: ["Leaf Plucking"],
+    nic: "911234567v",
+    status: "active",
+  },
+  {
+    id: "EMP018",
+    name: "Nimal Sirisena",
+    gender: "Male",
+    phone: "+94 77 999 0100",
+    estateId: "estate-1",
+    serviceCategories: ["Leaf Plucking"],
+    nic: "901234567v",
+    status: "active",
+  },
+  {
+    id: "EMP019",
+    name: "Sunil Perera",
+    gender: "Male",
+    phone: "+94 77 999 0200",
+    estateId: "estate-1",
+    serviceCategories: ["Weeding"],
+    nic: "891234567v",
     status: "active",
   },
 ];
@@ -241,18 +354,232 @@ const INITIAL_SERVICES: Service[] = [
 ];
 
 const INITIAL_ASSIGNMENTS: DailyAssignment[] = [
+  // Jan 2026 (Payroll target: 180,000)
   {
-    id: "da-1",
-    date: "2026-06-15",
+    id: "da-jan",
+    date: "2026-01-15",
+    estateId: "estate-1",
+    sectionId: "sec-1",
+    serviceId: "service-2",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 450, paymentAmount: 180000 }],
+    totalAmount: 180000,
+    status: "approved",
+  },
+  // Feb 2026 (Payroll target: 160,000)
+  {
+    id: "da-feb",
+    date: "2026-02-15",
+    estateId: "estate-1",
+    sectionId: "sec-2",
+    serviceId: "service-2",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 400, paymentAmount: 160000 }],
+    totalAmount: 160000,
+    status: "approved",
+  },
+  // Mar 2026 (Payroll target: 190,000)
+  {
+    id: "da-mar",
+    date: "2026-03-15",
+    estateId: "estate-1",
+    sectionId: "sec-3",
+    serviceId: "service-2",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 475, paymentAmount: 190000 }],
+    totalAmount: 190000,
+    status: "approved",
+  },
+  // Apr 2026 (Payroll target: 210,000)
+  {
+    id: "da-apr",
+    date: "2026-04-15",
+    estateId: "estate-1",
+    sectionId: "sec-4",
+    serviceId: "service-2",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 525, paymentAmount: 210000 }],
+    totalAmount: 210000,
+    status: "approved",
+  },
+  // May 2026 (Payroll target: 230,000)
+  {
+    id: "da-may",
+    date: "2026-05-15",
+    estateId: "estate-1",
+    sectionId: "sec-1",
+    serviceId: "service-2",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 575, paymentAmount: 230000 }],
+    totalAmount: 230000,
+    status: "approved",
+  },
+  // Recent Assignments matching TV Dashboard list (May 30 - 31)
+  // Leaf Plucking, 3 workers, 2026-05-31, Section A (Central Grove), LKR 3,825
+  {
+    id: "da-rec-1",
+    date: "2026-05-31",
     estateId: "estate-1",
     sectionId: "sec-1",
     serviceId: "service-6",
     assignments: [
-      { employeeId: "EMP001", unitsCompleted: 18.5, paymentAmount: 925 },
-      { employeeId: "EMP002", unitsCompleted: 22.0, paymentAmount: 1100 },
-      { employeeId: "EMP004", unitsCompleted: 15.5, paymentAmount: 775 },
+      { employeeId: "EMP001", unitsCompleted: 25.5, paymentAmount: 1275 },
+      { employeeId: "EMP002", unitsCompleted: 25.5, paymentAmount: 1275 },
+      { employeeId: "EMP008", unitsCompleted: 25.5, paymentAmount: 1275 },
     ],
-    totalAmount: 2800,
+    totalAmount: 3825,
+    status: "approved",
+  },
+  // Leaf Plucking, 3 workers, 2026-05-30, Section B (Section Beta), LKR 2,825
+  {
+    id: "da-rec-2",
+    date: "2026-05-30",
+    estateId: "estate-1",
+    sectionId: "sec-2",
+    serviceId: "service-6",
+    assignments: [
+      { employeeId: "EMP003", unitsCompleted: 20.0, paymentAmount: 1000 },
+      { employeeId: "EMP004", unitsCompleted: 20.0, paymentAmount: 1000 },
+      { employeeId: "EMP008", unitsCompleted: 16.5, paymentAmount: 825 },
+    ],
+    totalAmount: 2825,
+    status: "approved",
+  },
+  // Weeding, 2 workers, 2026-05-30, Section A (Central Grove), LKR 2,825
+  {
+    id: "da-rec-3",
+    date: "2026-05-30",
+    estateId: "estate-1",
+    sectionId: "sec-1",
+    serviceId: "service-1",
+    assignments: [
+      { employeeId: "EMP001", unitsCompleted: 4.0, paymentAmount: 1400 },
+      { employeeId: "EMP002", unitsCompleted: 4.07, paymentAmount: 1425 },
+    ],
+    totalAmount: 2825,
+    status: "approved",
+  },
+  // June 9, 2026 Today's Data
+  // - Today's Harvest: 112 KG (approved plucking, 8 workers, LKR 5,600)
+  // - Today's Payroll: LKR 122,800
+  // - Total worker assignments: 13 (8 plucking + 5 fertilizing, fertilizing payment LKR 117,200)
+  {
+    id: "da-jun9-plucking",
+    date: "2026-06-09",
+    estateId: "estate-1",
+    sectionId: "sec-1", // Central Grove
+    serviceId: "service-6",
+    assignments: [
+      { employeeId: "EMP001", unitsCompleted: 15.0, paymentAmount: 750 },
+      { employeeId: "EMP002", unitsCompleted: 14.0, paymentAmount: 700 },
+      { employeeId: "EMP003", unitsCompleted: 16.0, paymentAmount: 800 },
+      { employeeId: "EMP004", unitsCompleted: 15.0, paymentAmount: 750 },
+      { employeeId: "EMP008", unitsCompleted: 15.0, paymentAmount: 750 },
+      { employeeId: "EMP009", unitsCompleted: 14.0, paymentAmount: 700 },
+      { employeeId: "EMP017", unitsCompleted: 13.0, paymentAmount: 650 },
+      { employeeId: "EMP018", unitsCompleted: 10.0, paymentAmount: 500 },
+    ],
+    totalAmount: 5600,
+    status: "approved",
+  },
+  {
+    id: "da-jun9-fertilizing",
+    date: "2026-06-09",
+    estateId: "estate-1",
+    sectionId: "sec-2", // Section Beta
+    serviceId: "service-3",
+    assignments: [
+      { employeeId: "EMP010", unitsCompleted: 20.0, paymentAmount: 24000 },
+      { employeeId: "EMP011", unitsCompleted: 20.0, paymentAmount: 24000 },
+      { employeeId: "EMP012", unitsCompleted: 20.0, paymentAmount: 24000 },
+      { employeeId: "EMP013", unitsCompleted: 20.0, paymentAmount: 24000 },
+      { employeeId: "EMP014", unitsCompleted: 21.0, paymentAmount: 25200 },
+    ],
+    totalAmount: 117200,
+    status: "approved",
+  },
+  // June 2026 Section Harvest Totals (Overall Target: 2595.5 KG total pluck)
+  // Section 1 (Central Grove): Total 521.0 KG. Jun 9 has 112.0 KG => we add 409.0 KG.
+  {
+    id: "da-jun-sec1",
+    date: "2026-06-15",
+    estateId: "estate-1",
+    sectionId: "sec-1",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP001", unitsCompleted: 409.0, paymentAmount: 20450 }],
+    totalAmount: 20450,
+    status: "approved",
+  },
+  // Section 2 (Section Beta): Total 487.0 KG.
+  {
+    id: "da-jun-sec2",
+    date: "2026-06-16",
+    estateId: "estate-1",
+    sectionId: "sec-2",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP002", unitsCompleted: 487.0, paymentAmount: 24350 }],
+    totalAmount: 24350,
+    status: "approved",
+  },
+  // Section 3 (East Block): Total 412.0 KG.
+  {
+    id: "da-jun-sec3",
+    date: "2026-06-17",
+    estateId: "estate-1",
+    sectionId: "sec-3",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 412.0, paymentAmount: 20600 }],
+    totalAmount: 20600,
+    status: "approved",
+  },
+  // Section 4 (West Block): Total 378.5 KG.
+  {
+    id: "da-jun-sec4",
+    date: "2026-06-18",
+    estateId: "estate-1",
+    sectionId: "sec-4",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP004", unitsCompleted: 378.5, paymentAmount: 18925 }],
+    totalAmount: 18925,
+    status: "approved",
+  },
+  // Section 5 (Section Alpha): Total 342.5 KG.
+  {
+    id: "da-jun-sec5",
+    date: "2026-06-19",
+    estateId: "estate-1",
+    sectionId: "sec-1-5",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP008", unitsCompleted: 342.5, paymentAmount: 17125 }],
+    totalAmount: 17125,
+    status: "approved",
+  },
+  // Section 6 (Section Gamma): Total 298.5 KG.
+  {
+    id: "da-jun-sec6",
+    date: "2026-06-20",
+    estateId: "estate-1",
+    sectionId: "sec-1-6",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP009", unitsCompleted: 298.5, paymentAmount: 14925 }],
+    totalAmount: 14925,
+    status: "approved",
+  },
+  // Section 7 (North Hill): Total 156.0 KG.
+  {
+    id: "da-jun-sec7",
+    date: "2026-06-21",
+    estateId: "estate-1",
+    sectionId: "sec-1-7",
+    serviceId: "service-6",
+    assignments: [{ employeeId: "EMP017", unitsCompleted: 156.0, paymentAmount: 7800 }],
+    totalAmount: 7800,
+    status: "approved",
+  },
+  // Weeding approved assignment to reach June payroll chart target (90,000 LKR)
+  {
+    id: "da-jun-weeding-approved",
+    date: "2026-06-12",
+    estateId: "estate-1",
+    sectionId: "sec-2",
+    serviceId: "service-1",
+    assignments: [{ employeeId: "EMP003", unitsCompleted: 50.0, paymentAmount: 17500 }],
+    totalAmount: 17500,
     status: "approved",
   },
   {
@@ -271,6 +598,57 @@ const INITIAL_ASSIGNMENTS: DailyAssignment[] = [
 ];
 
 const INITIAL_EXPENSES: Expense[] = [
+  // Jan 2026 (Target: 100,000)
+  {
+    id: "ex-jan-1",
+    date: "2026-01-20",
+    category: "Utilities",
+    description: "Electricity and Water Bill",
+    amount: 100000,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  // Feb 2026 (Target: 90,000)
+  {
+    id: "ex-feb-1",
+    date: "2026-02-20",
+    category: "Transport",
+    description: "Monthly tractor fuel and leasing",
+    amount: 90000,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  // Mar 2026 (Target: 110,000)
+  {
+    id: "ex-mar-1",
+    date: "2026-03-20",
+    category: "Tools",
+    description: "New agricultural equipment purchase",
+    amount: 110000,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  // Apr 2026 (Target: 100,000)
+  {
+    id: "ex-apr-1",
+    date: "2026-04-20",
+    category: "Other",
+    description: "Fertilizer sprayers repair and servicing",
+    amount: 100000,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  // May 2026 (Target: 115,000 - 51,900 existing approved = 63,100 extra)
+  {
+    id: "ex-may-extra",
+    date: "2026-05-20",
+    category: "Utilities",
+    description: "Factory water purification filters replacement",
+    amount: 63100,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  // Original May Expenses
   {
     id: "ex-1",
     date: "2026-05-28",
@@ -326,6 +704,39 @@ const INITIAL_EXPENSES: Expense[] = [
     estateId: "estate-1",
     status: "rejected",
   },
+  // June 9, 2026 Mock "Today's" Expenses (Total: 12,000 LKR across 3 entries)
+  {
+    id: "ex-jun9-1",
+    date: "2026-06-09",
+    category: "Transport",
+    description: "Leaf collection truck diesel fuel",
+    amount: 4500,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  {
+    id: "ex-jun9-2",
+    date: "2026-06-09",
+    category: "Tools",
+    description: "Plucking shears sharpening service",
+    amount: 3500,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  {
+    id: "ex-jun9-3",
+    date: "2026-06-09",
+    category: "Other",
+    description: "Supervisor site visit transport allowance",
+    amount: 4000,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  // June 2026 (Target: 424,000 for donut breakdown)
+  // - Utilities: LKR 234,000 (ex-7 pending 3,500 + approved 230,500)
+  // - Transport: LKR 100,000 (ex-jun9-1 4,500 + approved 95,500)
+  // - Tools: LKR 56,000 (ex-jun9-2 3,500 + approved 52,500)
+  // - Others: LKR 34,000 (ex-jun9-3 4,000 + approved 30,000)
   {
     id: "ex-7",
     date: "2026-06-01",
@@ -334,6 +745,42 @@ const INITIAL_EXPENSES: Expense[] = [
     amount: 3500,
     estateId: "estate-1",
     status: "pending",
+  },
+  {
+    id: "ex-jun-util",
+    date: "2026-06-02",
+    category: "Utilities",
+    description: "Factory power supply and grid connection",
+    amount: 230500,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  {
+    id: "ex-jun-trans",
+    date: "2026-06-03",
+    category: "Transport",
+    description: "Truck maintenance services",
+    amount: 95500,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  {
+    id: "ex-jun-tools",
+    date: "2026-06-04",
+    category: "Tools",
+    description: "Automated pluckers purchase",
+    amount: 52500,
+    estateId: "estate-1",
+    status: "approved",
+  },
+  {
+    id: "ex-jun-other",
+    date: "2026-06-05",
+    category: "Other",
+    description: "Soil nutrition tests",
+    amount: 30000,
+    estateId: "estate-1",
+    status: "approved",
   },
 ];
 
