@@ -412,7 +412,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                   placeholder="Enter full name"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm outline-none transition-all placeholder-gray-400"
+                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400"
                   required
                 />
               </div>
@@ -427,7 +427,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                   placeholder="email@estate.com"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
-                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm outline-none transition-all placeholder-gray-400"
+                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400"
                   required
                 />
               </div>
@@ -443,7 +443,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                     placeholder="+94 77 000 0000"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm outline-none transition-all placeholder-gray-400"
+                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400"
                   />
                 </div>
                 <div className="flex flex-col">
@@ -453,7 +453,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                   <select
                     value={userRole}
                     onChange={(e) => setUserRole(e.target.value as "Administrator" | "Planter" | "Supervisor")}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm outline-none transition-all cursor-pointer"
+                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
                   >
                     <option value="Administrator">Administrator</option>
                     <option value="Planter">Planter</option>
@@ -470,7 +470,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                 <select
                   value={userEstateId}
                   onChange={(e) => setUserEstateId(e.target.value)}
-                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm outline-none transition-all cursor-pointer"
+                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
                 >
                   <option value="">None</option>
                   {estates.map((est) => (
@@ -489,7 +489,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                 <select
                   value={userStatus}
                   onChange={(e) => setUserStatus(e.target.value as "active" | "inactive")}
-                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm outline-none transition-all cursor-pointer"
+                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
