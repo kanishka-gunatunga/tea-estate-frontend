@@ -915,14 +915,16 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 export function DashboardStateProvider({ children }: { children: React.ReactNode }) {
   // Query data from backend
-  const { data: serverEstates } = useEstatesQuery();
-  const { data: serverUsers } = useUsersQuery();
-  const { data: serverEmployees } = useEmployeesQuery();
-  const { data: serverServices } = useServicesQuery();
-  const { data: serverAssignments } = useAssignmentsQuery();
-  const { data: serverExpenses } = useExpensesQuery();
-  const { data: serverEvents } = useEventsQuery();
-  const { data: serverProfile } = useProfileQuery();
+  const { data: serverEstates, isLoading: isLoadingEstates } = useEstatesQuery();
+  const { data: serverUsers, isLoading: isLoadingUsers } = useUsersQuery();
+  const { data: serverEmployees, isLoading: isLoadingEmployees } = useEmployeesQuery();
+  const { data: serverServices, isLoading: isLoadingServices } = useServicesQuery();
+  const { data: serverAssignments, isLoading: isLoadingAssignments } = useAssignmentsQuery();
+  const { data: serverExpenses, isLoading: isLoadingExpenses } = useExpensesQuery();
+  const { data: serverEvents, isLoading: isLoadingEvents } = useEventsQuery();
+  const { data: serverProfile, isLoading: isLoadingProfile } = useProfileQuery();
+
+  const isLoading = isLoadingEstates || isLoadingUsers || isLoadingEmployees || isLoadingServices || isLoadingAssignments || isLoadingExpenses || isLoadingEvents || isLoadingProfile;
 
   // Mutations
   const createEstate = useCreateEstateMutation();
@@ -963,20 +965,20 @@ export function DashboardStateProvider({ children }: { children: React.ReactNode
   const updateProfile = useUpdateProfileMutation();
 
   // Local state for UI components
-  const [estates, setEstatesState] = useState<Estate[]>(INITIAL_ESTATES);
-  const [users, setUsersState] = useState<User[]>(INITIAL_USERS);
-  const [employees, setEmployeesState] = useState<Employee[]>(INITIAL_EMPLOYEES);
-  const [services, setServicesState] = useState<Service[]>(INITIAL_SERVICES);
-  const [assignments, setAssignmentsState] = useState<DailyAssignment[]>(INITIAL_ASSIGNMENTS);
-  const [expenses, setExpensesState] = useState<Expense[]>(INITIAL_EXPENSES);
-  const [events, setEventsState] = useState<CalendarEvent[]>(INITIAL_EVENTS);
+  const [estates, setEstatesState] = useState<Estate[]>([]);
+  const [users, setUsersState] = useState<User[]>([]);
+  const [employees, setEmployeesState] = useState<Employee[]>([]);
+  const [services, setServicesState] = useState<Service[]>([]);
+  const [assignments, setAssignmentsState] = useState<DailyAssignment[]>([]);
+  const [expenses, setExpensesState] = useState<Expense[]>([]);
+  const [events, setEventsState] = useState<CalendarEvent[]>([]);
   const [profile, setProfileState] = useState<UserProfile>({
-    name: "Carter Bator",
-    email: "carter@greenleaf.com",
-    phone: "+94 77 123 4567",
-    address: "Colombo, Sri Lanka",
-    role: "Administrator",
-    memberSince: "2020-01-15",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    role: "",
+    memberSince: "",
   });
 
   // Sync server queries to local state
@@ -1264,6 +1266,20 @@ export function DashboardStateProvider({ children }: { children: React.ReactNode
     setProfileState(next);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#F9FAFB]">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="w-10 h-10 text-[#00A63E] animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span className="text-[#6A7282] font-medium text-sm">Loading dashboard data...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DashboardContext.Provider
       value={{
@@ -1297,3 +1313,4 @@ export function useDashboardContext() {
   }
   return context;
 }
+

@@ -131,7 +131,7 @@ export default function Reports({
       const section = estate?.sections.find((s) => s.id === da.sectionId);
       const service = services.find((s) => s.id === da.serviceId);
 
-      da.assignments.forEach((wa) => {
+      da.assignments?.forEach((wa) => {
         if (filters.workerFilter !== "all" && wa.employeeId !== filters.workerFilter) return;
 
         const worker = employees.find((e) => e.id === wa.employeeId);
@@ -163,7 +163,7 @@ export default function Reports({
       const estate = estates.find((e) => e.id === da.estateId);
       const service = services.find((s) => s.id === da.serviceId);
 
-      da.assignments.forEach((wa) => {
+      da.assignments?.forEach((wa) => {
         if (filters.workerFilter !== "all" && wa.employeeId !== filters.workerFilter) return;
 
         const worker = employees.find((e) => e.id === wa.employeeId);
@@ -254,7 +254,7 @@ export default function Reports({
         };
       }
 
-      da.assignments.forEach((wa) => {
+      da.assignments?.forEach((wa) => {
         if (filters.workerFilter !== "all" && wa.employeeId !== filters.workerFilter) return;
         keyMap[key].totalHarvest += wa.unitsCompleted;
         keyMap[key].totalPayment += wa.paymentAmount;

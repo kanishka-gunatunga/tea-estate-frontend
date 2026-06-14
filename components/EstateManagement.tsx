@@ -305,7 +305,7 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
                           className={`w-2 h-2 rounded-full ${
                             est.status === "active"
                               ? "bg-[#00C950]"
-                              : "bg-[#D1D5DC]"
+                              : "bg-red-500"
                           }`}
                         />
                         <h3 className="text-base font-medium text-[#1E2939] leading-tight">
@@ -484,7 +484,11 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
                   </div>
                   <div className="flex items-center gap-2 text-sm text-[#6A7282]">
                     <span className="font-normal">Status:</span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#ECFDF5] text-[#047857] capitalize border border-[#B9F8CF]">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize border ${
+                      activeEstate.status === "active" 
+                        ? "bg-[#ECFDF5] text-[#047857] border-[#B9F8CF]" 
+                        : "bg-red-50 text-red-700 border-red-200"
+                    }`}>
                       {activeEstate.status}
                     </span>
                   </div>
