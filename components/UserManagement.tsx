@@ -88,14 +88,14 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
         prev.map((u) =>
           u.id === editingUser.id
             ? {
-                ...u,
-                name: userName,
-                email: userEmail,
-                phone: userPhone,
-                role: userRole,
-                assignedEstateId: userEstateId || undefined,
-                status: userStatus,
-              }
+              ...u,
+              name: userName,
+              email: userEmail,
+              phone: userPhone,
+              role: userRole,
+              assignedEstateId: userEstateId || undefined,
+              status: userStatus,
+            }
             : u
         )
       );
@@ -148,19 +148,19 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
 
       {/* Dashboard Content area */}
       <div className="flex-1 flex flex-col overflow-y-auto p-8 gap-8">
-        
+
         {/* Statistics Cards Grid */}
         <section className="grid grid-cols-4 gap-6 shrink-0">
-          
+
           {/* Card: Total Users */}
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 flex flex-col justify-between h-28 shadow-xs">
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#F3F4F6] text-[#364153] tracking-wide">
                 Total Users
               </span>
-              <svg className="w-4.5 h-4.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              {/* <svg className="w-4.5 h-4.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              </svg> */}
             </div>
             <div>
               <span className="text-2xl font-bold text-[#1E2939] block">{totalUsersCount}</span>
@@ -174,9 +174,9 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#F3E8FF] text-[#6E11B0] tracking-wide">
                 Administrator
               </span>
-              <svg className="w-4.5 h-4.5 text-[#6E11B0]/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              {/* <svg className="w-4.5 h-4.5 text-[#6E11B0]/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+              </svg> */}
             </div>
             <div>
               <span className="text-2xl font-bold text-[#1E2939] block">{adminCount}</span>
@@ -190,9 +190,9 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#D0FAE5] text-[#006045] tracking-wide">
                 Planter
               </span>
-              <svg className="w-4.5 h-4.5 text-[#006045]/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              {/* <svg className="w-4.5 h-4.5 text-[#006045]/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+              </svg> */}
             </div>
             <div>
               <span className="text-2xl font-bold text-[#1E2939] block">{planterCount}</span>
@@ -206,10 +206,10 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#DBEAFE] text-[#193CB8] tracking-wide">
                 Supervisor
               </span>
-              <svg className="w-4.5 h-4.5 text-[#193CB8]/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              {/* <svg className="w-4.5 h-4.5 text-[#193CB8]/50" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
+              </svg> */}
             </div>
             <div>
               <span className="text-2xl font-bold text-[#1E2939] block">{supervisorCount}</span>
@@ -221,10 +221,10 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
 
         {/* User Management List Container */}
         <section className="bg-white border border-[#E5E7EB] rounded-2xl shadow-xs flex flex-col overflow-hidden">
-          
+
           {/* Table Header Filter Row */}
           <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 bg-white">
-            
+
             {/* Search Input */}
             <div className="relative w-96 shrink-0">
               <input
@@ -272,7 +272,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                 <tbody className="divide-y divide-gray-100">
                   {filteredUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50/60 transition-colors">
-                      
+
                       {/* Name & Email Avatar */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -320,11 +320,10 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                       {/* Status */}
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                            user.status === "active"
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${user.status === "active"
                               ? "bg-[#DCFCE7] text-[#008236]"
                               : "bg-gray-100 text-gray-600"
-                          }`}
+                            }`}
                         >
                           {user.status}
                         </span>
@@ -378,7 +377,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
       {isUserModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[488px] overflow-hidden animate-in fade-in-50 zoom-in-95 duration-200">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">

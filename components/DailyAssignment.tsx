@@ -589,7 +589,7 @@ export default function DailyAssignmentComponent({
                                           }
                                           min="0"
                                           step="0.5"
-                                          className="w-20 h-8 text-center border border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 rounded-lg text-sm bg-white font-medium"
+                                          className="w-20 h-8 text-center border border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 rounded-lg text-sm bg-white text-gray-800 font-medium"
                                           autoFocus
                                         />
                                       ) : (
@@ -716,7 +716,7 @@ export default function DailyAssignmentComponent({
                             }
                             min="0.01"
                             step="0.5"
-                            className="w-36 h-9 px-3 border border-gray-300 focus:border-[#00A63E] rounded-lg text-xs outline-none"
+                            className="w-36 h-9 px-3 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg text-xs text-gray-800 outline-none"
                           />
 
                           {/* Payment calculation preview */}
