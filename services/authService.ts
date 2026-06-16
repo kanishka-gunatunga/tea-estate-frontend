@@ -25,4 +25,15 @@ export const authService = {
     const response = await api.post("/auth/change-password", payload);
     return response.data.data;
   },
+
+  async uploadProfilePhoto(file: File) {
+    const formData = new FormData();
+    formData.append("photo", file);
+    const response = await api.patch("/auth/profile/photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data;
+  },
 };

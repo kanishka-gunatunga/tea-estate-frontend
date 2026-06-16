@@ -890,6 +890,7 @@ interface UserProfile {
   address: string;
   role: string;
   memberSince: string;
+  profilePhoto?: string | null;
 }
 
 interface DashboardContextType {
@@ -979,6 +980,7 @@ export function DashboardStateProvider({ children }: { children: React.ReactNode
     address: "",
     role: "",
     memberSince: "",
+    profilePhoto: null,
   });
 
   // Sync server queries to local state
@@ -1018,7 +1020,8 @@ export function DashboardStateProvider({ children }: { children: React.ReactNode
         phone: serverProfile.phone || "",
         address: serverProfile.address || "",
         role: serverProfile.role,
-        memberSince: serverProfile.registeredDate ? new Date(serverProfile.registeredDate).toISOString().split("T")[0] : "",
+        memberSince: serverProfile.memberSince || (serverProfile.registeredDate ? new Date(serverProfile.registeredDate).toISOString().split("T")[0] : ""),
+        profilePhoto: serverProfile.profilePhoto || null,
       });
     }
   }, [serverProfile]);
