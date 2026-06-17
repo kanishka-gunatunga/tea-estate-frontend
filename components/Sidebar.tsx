@@ -33,6 +33,7 @@ interface SidebarProps {
   profile?: {
     name: string;
     role: string;
+    profilePhoto?: string | null;
   };
 }
 
@@ -284,18 +285,26 @@ export default function Sidebar({ activeView, profile }: SidebarProps) {
       <div className="flex items-center justify-between px-3 py-4 h-[65px] border-t border-[#016630] box-border">
         <Link
           href="/dashboard/profile"
-          className="flex items-center gap-3 cursor-pointer hover:bg-emerald-900/20 p-1.5 rounded-xl transition-all"
+          className="flex items-center gap-3 cursor-pointer hover:bg-emerald-900/20 p-1.5 rounded-xl transition-all min-w-0 flex-1"
           title="View My Profile"
         >
-          {/* User initials box avatar */}
-          <div className="w-8 h-8 bg-[#00A63E] rounded-[10px] flex items-center justify-center font-bold text-xs text-white select-none shrink-0">
-            {profile ? profile.name.split(" ").map((n) => n[0]).join("") : "CB"}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-white leading-[16px]">
+          {/* User profile photo or initials box avatar */}
+          {profile?.profilePhoto ? (
+            <img
+              src={profile.profilePhoto}
+              alt="Profile"
+              className="w-8 h-8 rounded-[10px] object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-[#00A63E] rounded-[10px] flex items-center justify-center font-bold text-xs text-white select-none shrink-0">
+              {profile ? profile.name.split(" ").map((n) => n[0]).join("") : "CB"}
+            </div>
+          )}
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-xs font-medium text-white leading-[16px] truncate">
               {profile ? profile.name : "Carter Bator"}
             </span>
-            <span className="text-xs font-normal text-[#05DF72] leading-[16px] mt-0.5">
+            <span className="text-xs font-normal text-[#05DF72] leading-[16px] mt-0.5 truncate">
               {profile ? profile.role : "Administrator"}
             </span>
           </div>

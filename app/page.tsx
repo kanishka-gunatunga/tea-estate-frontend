@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/authService";
 
 export default function Login() {
   const router = useRouter();
@@ -40,20 +41,24 @@ export default function Login() {
     setIsLoading(true);
     setErrors({});
 
-    // Simulate authentication API call
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email === "admin@gmail.com" && password === "admin123") {
+    authService.login({ email, password })
+      .then((data) => {
+        setIsLoading(false);
+        localStorage.setItem("tea-estate-token", data.token);
+        localStorage.setItem("tea-estate-user", JSON.stringify(data.user));
+        
         setSuccessMessage("Sign in successful! Redirecting to dashboard...");
         setTimeout(() => {
           router.push("/dashboard");
         }, 800);
-      } else {
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        const errMsg = err.response?.data?.message || err.message || "Invalid email or password.";
         setErrors({
-          auth: "Invalid email or password. (Try admin@gmail.com / admin123)"
+          auth: errMsg
         });
-      }
-    }, 1500);
+      });
   };
 
   return (

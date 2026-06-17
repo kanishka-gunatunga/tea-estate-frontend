@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { Estate } from "@/components/EstateManagement";
 import { User } from "@/components/UserManagement";
 import { Employee } from "@/components/EmployeeManagement";
@@ -8,6 +8,45 @@ import { Service } from "@/components/ServiceManagement";
 import { DailyAssignment } from "@/components/DailyAssignment";
 import { Expense } from "@/components/Expenses";
 import { CalendarEvent } from "@/components/Reminders";
+import {
+  useEstatesQuery,
+  useCreateEstateMutation,
+  useUpdateEstateMutation,
+  useDeleteEstateMutation,
+  useCreateSectionMutation,
+  useUpdateSectionMutation,
+  useDeleteSectionMutation,
+  useEmployeesQuery,
+  useCreateEmployeeMutation,
+  useUpdateEmployeeMutation,
+  useDeleteEmployeeMutation,
+  useServicesQuery,
+  useCreateServiceMutation,
+  useUpdateServiceMutation,
+  useDeleteServiceMutation,
+  useAssignmentsQuery,
+  useCreateAssignmentMutation,
+  useUpdateAssignmentMutation,
+  useDeleteAssignmentMutation,
+  useUpdateAssignmentStatusMutation,
+  useAddWorkerMutation,
+  useUpdateWorkerMutation,
+  useRemoveWorkerMutation,
+  useExpensesQuery,
+  useCreateExpenseMutation,
+  useUpdateExpenseMutation,
+  useDeleteExpenseMutation,
+  useEventsQuery,
+  useCreateEventMutation,
+  useUpdateEventMutation,
+  useDeleteEventMutation,
+  useUsersQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  useProfileQuery,
+  useUpdateProfileMutation,
+} from "@/hooks/hooks";
 
 // --- Seed Data ---
 const INITIAL_ESTATES: Estate[] = [
@@ -851,6 +890,7 @@ interface UserProfile {
   address: string;
   role: string;
   memberSince: string;
+  profilePhoto?: string | null;
 }
 
 interface DashboardContextType {
@@ -875,21 +915,373 @@ interface DashboardContextType {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export function DashboardStateProvider({ children }: { children: React.ReactNode }) {
-  const [estates, setEstates] = useState<Estate[]>(INITIAL_ESTATES);
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
-  const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
-  const [assignments, setAssignments] = useState<DailyAssignment[]>(INITIAL_ASSIGNMENTS);
-  const [expenses, setExpenses] = useState<Expense[]>(INITIAL_EXPENSES);
-  const [events, setEvents] = useState<CalendarEvent[]>(INITIAL_EVENTS);
-  const [profile, setProfile] = useState<UserProfile>({
-    name: "Carter Bator",
-    email: "carter@greenleaf.com",
-    phone: "+94 77 123 4567",
-    address: "Colombo, Sri Lanka",
-    role: "Administrator",
-    memberSince: "2020-01-15",
+  // Query data from backend
+  const { data: serverEstates, isLoading: isLoadingEstates } = useEstatesQuery();
+  const { data: serverUsers, isLoading: isLoadingUsers } = useUsersQuery();
+  const { data: serverEmployees, isLoading: isLoadingEmployees } = useEmployeesQuery();
+  const { data: serverServices, isLoading: isLoadingServices } = useServicesQuery();
+  const { data: serverAssignments, isLoading: isLoadingAssignments } = useAssignmentsQuery();
+  const { data: serverExpenses, isLoading: isLoadingExpenses } = useExpensesQuery();
+  const { data: serverEvents, isLoading: isLoadingEvents } = useEventsQuery();
+  const { data: serverProfile, isLoading: isLoadingProfile } = useProfileQuery();
+
+  const isLoading = isLoadingEstates || isLoadingUsers || isLoadingEmployees || isLoadingServices || isLoadingAssignments || isLoadingExpenses || isLoadingEvents || isLoadingProfile;
+
+  // Mutations
+  const createEstate = useCreateEstateMutation();
+  const updateEstate = useUpdateEstateMutation();
+  const deleteEstate = useDeleteEstateMutation();
+  const createSection = useCreateSectionMutation();
+  const updateSection = useUpdateSectionMutation();
+  const deleteSection = useDeleteSectionMutation();
+
+  const createEmployee = useCreateEmployeeMutation();
+  const updateEmployee = useUpdateEmployeeMutation();
+  const deleteEmployee = useDeleteEmployeeMutation();
+
+  const createService = useCreateServiceMutation();
+  const updateService = useUpdateServiceMutation();
+  const deleteService = useDeleteServiceMutation();
+
+  const createAssignment = useCreateAssignmentMutation();
+  const updateAssignment = useUpdateAssignmentMutation();
+  const deleteAssignment = useDeleteAssignmentMutation();
+  const updateAssignmentStatus = useUpdateAssignmentStatusMutation();
+  const addWorker = useAddWorkerMutation();
+  const updateWorker = useUpdateWorkerMutation();
+  const removeWorker = useRemoveWorkerMutation();
+
+  const createExpense = useCreateExpenseMutation();
+  const updateExpense = useUpdateExpenseMutation();
+  const deleteExpense = useDeleteExpenseMutation();
+
+  const createEvent = useCreateEventMutation();
+  const updateEvent = useUpdateEventMutation();
+  const deleteEvent = useDeleteEventMutation();
+
+  const createUser = useCreateUserMutation();
+  const updateUser = useUpdateUserMutation();
+  const deleteUser = useDeleteUserMutation();
+
+  const updateProfile = useUpdateProfileMutation();
+
+  // Local state for UI components
+  const [estates, setEstatesState] = useState<Estate[]>([]);
+  const [users, setUsersState] = useState<User[]>([]);
+  const [employees, setEmployeesState] = useState<Employee[]>([]);
+  const [services, setServicesState] = useState<Service[]>([]);
+  const [assignments, setAssignmentsState] = useState<DailyAssignment[]>([]);
+  const [expenses, setExpensesState] = useState<Expense[]>([]);
+  const [events, setEventsState] = useState<CalendarEvent[]>([]);
+  const [profile, setProfileState] = useState<UserProfile>({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    role: "",
+    memberSince: "",
+    profilePhoto: null,
   });
+
+  // Sync server queries to local state
+  useEffect(() => {
+    if (serverEstates) setEstatesState(serverEstates as any);
+  }, [serverEstates]);
+
+  useEffect(() => {
+    if (serverUsers) setUsersState(serverUsers as any);
+  }, [serverUsers]);
+
+  useEffect(() => {
+    if (serverEmployees) setEmployeesState(serverEmployees as any);
+  }, [serverEmployees]);
+
+  useEffect(() => {
+    if (serverServices) setServicesState(serverServices as any);
+  }, [serverServices]);
+
+  useEffect(() => {
+    if (serverAssignments) setAssignmentsState(serverAssignments as any);
+  }, [serverAssignments]);
+
+  useEffect(() => {
+    if (serverExpenses) setExpensesState(serverExpenses as any);
+  }, [serverExpenses]);
+
+  useEffect(() => {
+    if (serverEvents) setEventsState(serverEvents as any);
+  }, [serverEvents]);
+
+  useEffect(() => {
+    if (serverProfile) {
+      setProfileState({
+        name: serverProfile.name,
+        email: serverProfile.email,
+        phone: serverProfile.phone || "",
+        address: serverProfile.address || "",
+        role: serverProfile.role,
+        memberSince: serverProfile.memberSince || (serverProfile.registeredDate ? new Date(serverProfile.registeredDate).toISOString().split("T")[0] : ""),
+        profilePhoto: serverProfile.profilePhoto || null,
+      });
+    }
+  }, [serverProfile]);
+
+  // Sync setters to mutations (Optimistic update style)
+  const setEstates: React.Dispatch<React.SetStateAction<Estate[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(estates) : arg;
+    const prev = estates;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) {
+        createEstate.mutate(added);
+      }
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) {
+        deleteEstate.mutate(deleted.id);
+      }
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (!pItem) return;
+        if (JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          if (JSON.stringify(nItem.sections) !== JSON.stringify(pItem.sections)) {
+            const pSecs = pItem.sections || [];
+            const nSecs = nItem.sections || [];
+            if (nSecs.length > pSecs.length) {
+              const addedSec = nSecs.find((s) => !pSecs.some((ps) => ps.id === s.id));
+              if (addedSec) {
+                createSection.mutate({ estateId: nItem.id, payload: addedSec });
+              }
+            } else if (nSecs.length < pSecs.length) {
+              const deletedSec = pSecs.find((s) => !nSecs.some((ns) => ns.id === s.id));
+              if (deletedSec) {
+                deleteSection.mutate({ estateId: nItem.id, sectionId: deletedSec.id });
+              }
+            } else {
+              nSecs.forEach((nSec) => {
+                const pSec = pSecs.find((ps) => ps.id === nSec.id);
+                if (pSec && JSON.stringify(nSec) !== JSON.stringify(pSec)) {
+                  updateSection.mutate({
+                    estateId: nItem.id,
+                    sectionId: nSec.id,
+                    payload: nSec,
+                  });
+                }
+              });
+            }
+          } else {
+            updateEstate.mutate({ id: nItem.id, payload: nItem });
+          }
+        }
+      });
+    }
+    setEstatesState(next);
+  };
+
+  const setUsers: React.Dispatch<React.SetStateAction<User[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(users) : arg;
+    const prev = users;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) {
+        createUser.mutate({
+          ...added,
+          password: "defaultPassword123",
+        });
+      }
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) {
+        deleteUser.mutate(deleted.id);
+      }
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (pItem && JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          updateUser.mutate({ id: nItem.id, payload: nItem });
+        }
+      });
+    }
+    setUsersState(next);
+  };
+
+  const setEmployees: React.Dispatch<React.SetStateAction<Employee[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(employees) : arg;
+    const prev = employees;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) createEmployee.mutate(added);
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) deleteEmployee.mutate(deleted.id);
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (pItem && JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          updateEmployee.mutate({ id: nItem.id, payload: nItem });
+        }
+      });
+    }
+    setEmployeesState(next);
+  };
+
+  const setServices: React.Dispatch<React.SetStateAction<Service[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(services) : arg;
+    const prev = services;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) createService.mutate(added);
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) deleteService.mutate(deleted.id);
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (pItem && JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          updateService.mutate({ id: nItem.id, payload: nItem });
+        }
+      });
+    }
+    setServicesState(next);
+  };
+
+  const setAssignments: React.Dispatch<React.SetStateAction<DailyAssignment[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(assignments) : arg;
+    const prev = assignments;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) {
+        createAssignment.mutate({
+          date: added.date,
+          estateId: added.estateId,
+          sectionId: added.sectionId,
+          serviceId: added.serviceId,
+        });
+      }
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) deleteAssignment.mutate(deleted.id);
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (!pItem) return;
+        if (JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          if (nItem.status !== pItem.status) {
+            updateAssignmentStatus.mutate({ id: nItem.id, status: nItem.status });
+          }
+          if (JSON.stringify(nItem.assignments) !== JSON.stringify(pItem.assignments)) {
+            const pWorkers = pItem.assignments || [];
+            const nWorkers = nItem.assignments || [];
+            if (nWorkers.length > pWorkers.length) {
+              const addedWorker = nWorkers.find((w) => !pWorkers.some((pw) => pw.employeeId === w.employeeId));
+              if (addedWorker) {
+                addWorker.mutate({
+                  assignmentId: nItem.id,
+                  payload: {
+                    employeeId: addedWorker.employeeId,
+                    unitsCompleted: addedWorker.unitsCompleted,
+                  },
+                });
+              }
+            } else if (nWorkers.length < pWorkers.length) {
+              const deletedWorker = pWorkers.find((w) => !nWorkers.some((nw) => nw.employeeId === w.employeeId));
+              if (deletedWorker) {
+                removeWorker.mutate({
+                  assignmentId: nItem.id,
+                  employeeId: deletedWorker.employeeId,
+                });
+              }
+            } else {
+              nWorkers.forEach((nw) => {
+                const pw = pWorkers.find((p) => p.employeeId === nw.employeeId);
+                if (pw && JSON.stringify(nw) !== JSON.stringify(pw)) {
+                  updateWorker.mutate({
+                    assignmentId: nItem.id,
+                    employeeId: nw.employeeId,
+                    payload: {
+                      unitsCompleted: nw.unitsCompleted,
+                    },
+                  });
+                }
+              });
+            }
+          } else {
+            updateAssignment.mutate({ id: nItem.id, payload: nItem });
+          }
+        }
+      });
+    }
+    setAssignmentsState(next);
+  };
+
+  const setExpenses: React.Dispatch<React.SetStateAction<Expense[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(expenses) : arg;
+    const prev = expenses;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) createExpense.mutate(added);
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) deleteExpense.mutate(deleted.id);
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (pItem && JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          updateExpense.mutate({ id: nItem.id, payload: nItem });
+        }
+      });
+    }
+    setExpensesState(next);
+  };
+
+  const setEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>> = (arg) => {
+    const next = typeof arg === "function" ? arg(events) : arg;
+    const prev = events;
+    if (next.length > prev.length) {
+      const added = next.find((item) => !prev.some((p) => p.id === item.id));
+      if (added) createEvent.mutate(added);
+    } else if (next.length < prev.length) {
+      const deleted = prev.find((item) => !next.some((n) => n.id === item.id));
+      if (deleted) deleteEvent.mutate(deleted.id);
+    } else {
+      next.forEach((nItem) => {
+        const pItem = prev.find((p) => p.id === nItem.id);
+        if (pItem && JSON.stringify(nItem) !== JSON.stringify(pItem)) {
+          updateEvent.mutate({ id: nItem.id, payload: nItem });
+        }
+      });
+    }
+    setEventsState(next);
+  };
+
+  const setProfile: React.Dispatch<React.SetStateAction<UserProfile>> = (arg) => {
+    const next = typeof arg === "function" ? arg(profile) : arg;
+    const prev = profile;
+    if (JSON.stringify(next) !== JSON.stringify(prev)) {
+      updateProfile.mutate({
+        name: next.name,
+        email: next.email,
+        phone: next.phone,
+        address: next.address,
+      });
+    }
+    setProfileState(next);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#F9FAFB]">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="w-10 h-10 text-[#00A63E] animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span className="text-[#6A7282] font-medium text-sm">Loading dashboard data...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardContext.Provider
@@ -924,3 +1316,4 @@ export function useDashboardContext() {
   }
   return context;
 }
+

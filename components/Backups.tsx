@@ -8,6 +8,8 @@ import { Employee } from "@/components/EmployeeManagement";
 import { Service } from "@/components/ServiceManagement";
 import { DailyAssignment } from "@/components/DailyAssignment";
 import { Expense } from "@/components/Expenses";
+import { useBackupsQuery, useCreateBackupMutation, useDeleteBackupMutation } from "@/hooks/hooks";
+import { api } from "@/services/api";
 
 interface BackupRecord {
   id: string;
@@ -36,63 +38,17 @@ export default function Backups({
   expenses,
   assignments,
 }: BackupsProps) {
-  // Seed backup history matching Figma screenshot
-  const [backups, setBackups] = useState<BackupRecord[]>([
-    {
-      id: "b-1",
-      filename: "backup_2026-06-01_auto.xlsx",
-      createdAt: "2026-06-01 00:00:12",
-      type: "Auto",
-      sizeKB: 142,
-      records: 287,
-      status: "success",
-    },
-    {
-      id: "b-2",
-      filename: "backup_2026-05-25_manual.xlsx",
-      createdAt: "2026-05-25 14:32:05",
-      type: "Manual",
-      sizeKB: 138,
-      records: 281,
-      status: "success",
-    },
-    {
-      id: "b-3",
-      filename: "backup_2026-05-15_auto.xlsx",
-      createdAt: "2026-05-15 00:00:09",
-      type: "Auto",
-      sizeKB: 135,
-      records: 274,
-      status: "success",
-    },
-    {
-      id: "b-4",
-      filename: "backup_2026-05-01_auto.xlsx",
-      createdAt: "2026-05-01 00:00:14",
-      type: "Auto",
-      sizeKB: 131,
-      records: 269,
-      status: "success",
-    },
-    {
-      id: "b-5",
-      filename: "backup_2026-04-20_manual.xlsx",
-      createdAt: "2026-04-20 09:15:44",
-      type: "Manual",
-      sizeKB: 129,
-      records: 261,
-      status: "success",
-    },
-    {
-      id: "b-6",
-      filename: "backup_2026-04-01_auto.xlsx",
-      createdAt: "2026-04-01 00:00:06",
-      type: "Auto",
-      sizeKB: 127,
-      records: null,
-      status: "failed",
-    },
-  ]);
+  const { data: serverBackups } = useBackupsQuery();
+  const createBackupMutation = useCreateBackupMutation();
+  const deleteBackupMutation = useDeleteBackupMutation();
+
+  const [backups, setBackups] = useState<BackupRecord[]>([]);
+
+  useEffect(() => {
+    if (serverBackups) {
+      setBackups(serverBackups as any);
+    }
+  }, [serverBackups]);
 
   // Scheduler configuration states
   const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(true);
@@ -196,20 +152,31 @@ export default function Backups({
   };
 
   // Create & Download Action
-  const handleCreateBackup = () => {
+  const handleCreateBackup = async () => {
     if (isGenerating) return;
     setIsGenerating(true);
+    try {
+      const newRecord = await createBackupMutation.mutateAsync("Manual");
+      if (newRecord.status === "success") {
+        await handleDownloadBackup(newRecord.id, newRecord.filename);
+        setToastMessage("System backup successfully compiled and downloaded!");
+      } else {
+        setToastMessage("Backup compiled, but failed on server.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setToastMessage(err.response?.data?.message || err.message || "Backup generation failed.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-    // Simulate export generation pipeline
-    setTimeout(() => {
-      const now = new Date();
-      const filename = `backup_${formatDateOnly(now)}_manual.xlsx`;
-
-      // 1. Compile real data
-      const dataCSV = generateDatabaseCSV();
-      const blob = new Blob([dataCSV], { type: "text/csv;charset=utf-8;" });
-
-      // 2. Trigger browser file download
+  const handleDownloadBackup = async (id: string, filename: string) => {
+    try {
+      const response = await api.get(`/backups/${id}/download`, {
+        responseType: "blob",
+      });
+      const blob = new Blob([response.data], { type: "application/zip" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
@@ -218,74 +185,28 @@ export default function Backups({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Calculate context record size dynamically
-      const activeRecordsCount =
-        estates.length +
-        users.length +
-        employees.length +
-        services.length +
-        expenses.length +
-        assignments.length +
-        250; // add baseline historical count
-
-      const calculatedSizeKB = Math.floor(activeRecordsCount * 0.49);
-
-      // 3. Update backups record list
-      const newRecord: BackupRecord = {
-        id: `backup-${Date.now()}`,
-        filename,
-        createdAt: formatDateTime(now),
-        type: "Manual",
-        sizeKB: calculatedSizeKB,
-        records: activeRecordsCount,
-        status: "success",
-      };
-
-      setBackups((prev) => [newRecord, ...prev]);
-      setIsGenerating(false);
-      setToastMessage("System backup successfully compiled and downloaded!");
-    }, 1500);
+    } catch (err: any) {
+      console.error(err);
+      setToastMessage("Failed to download backup zip file.");
+    }
   };
 
   // Re-download historical spreadsheet backup file
   const handleDownloadHistorical = (record: BackupRecord) => {
     if (record.status === "failed") return;
-
-    // Build mock spreadsheet data relative to target backup timestamp
-    let csv = "";
-    csv += "# =========================================================\n";
-    csv += `# HISTORICAL BACKUP RESTORE - ${record.filename.toUpperCase()}\n`;
-    csv += `# Created At: ${record.createdAt}\n`;
-    csv += `# File Size: ${record.sizeKB} KB | Records Count: ${record.records}\n`;
-    csv += "# =========================================================\n\n";
-    csv += "[METADATA]\n";
-    csv += `Export Type,${record.type}\n`;
-    csv += `Status,${record.status}\n`;
-    csv += `System Version,0.1.0\n\n`;
-
-    csv += "[DATABASE TABLES DUMP]\n";
-    csv += "Data dump compiled into backup file archive.\n";
-    csv += "To restore, upload this sheet index to estate system admin importer dashboard.";
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", record.filename);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    setToastMessage(`Downloaded historical archive: ${record.filename}`);
+    void handleDownloadBackup(record.id, record.filename);
   };
 
   // Delete Backup
-  const handleDeleteBackup = (id: string, filename: string) => {
+  const handleDeleteBackup = async (id: string, filename: string) => {
     if (confirm(`Are you sure you want to permanently delete the backup file "${filename}"?`)) {
-      setBackups((prev) => prev.filter((b) => b.id !== id));
-      setToastMessage(`Deleted backup archive: ${filename}`);
+      try {
+        await deleteBackupMutation.mutateAsync(id);
+        setToastMessage(`Deleted backup archive: ${filename}`);
+      } catch (err: any) {
+        console.error(err);
+        setToastMessage("Failed to delete backup.");
+      }
     }
   };
 

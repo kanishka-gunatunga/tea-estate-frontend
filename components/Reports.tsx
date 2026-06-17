@@ -4,6 +4,8 @@ import { Employee } from "./EmployeeManagement";
 import { Service } from "./ServiceManagement";
 import { DailyAssignment } from "./DailyAssignment";
 import { Expense } from "./Expenses";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // --- Types ---
 interface ReportsProps {
@@ -131,7 +133,7 @@ export default function Reports({
       const section = estate?.sections.find((s) => s.id === da.sectionId);
       const service = services.find((s) => s.id === da.serviceId);
 
-      da.assignments.forEach((wa) => {
+      da.assignments?.forEach((wa) => {
         if (filters.workerFilter !== "all" && wa.employeeId !== filters.workerFilter) return;
 
         const worker = employees.find((e) => e.id === wa.employeeId);
@@ -163,7 +165,7 @@ export default function Reports({
       const estate = estates.find((e) => e.id === da.estateId);
       const service = services.find((s) => s.id === da.serviceId);
 
-      da.assignments.forEach((wa) => {
+      da.assignments?.forEach((wa) => {
         if (filters.workerFilter !== "all" && wa.employeeId !== filters.workerFilter) return;
 
         const worker = employees.find((e) => e.id === wa.employeeId);
@@ -254,7 +256,7 @@ export default function Reports({
         };
       }
 
-      da.assignments.forEach((wa) => {
+      da.assignments?.forEach((wa) => {
         if (filters.workerFilter !== "all" && wa.employeeId !== filters.workerFilter) return;
         keyMap[key].totalHarvest += wa.unitsCompleted;
         keyMap[key].totalPayment += wa.paymentAmount;
@@ -386,9 +388,234 @@ export default function Reports({
     document.body.removeChild(link);
   };
 
-  // Handle PDF print export
+  // Handle PDF export using jsPDF and autoTable
   const handleExportPDF = () => {
-    window.print();
+    let headers: string[] = [];
+    let rows: string[][] = [];
+    let title = "";
+    let footerRow: string[] = [];
+    const filename = `report_${activeFilters.reportType}_${activeFilters.fromDate}_to_${activeFilters.toDate}.pdf`;
+
+    if (activeFilters.reportType === "assignments") {
+      const data = reportData as AssignmentReportRow[];
+      title = "Daily Assignments Report";
+      headers = [
+        "Date",
+        "Estate",
+        "Section",
+        "Service",
+        "Worker",
+        "Employee ID",
+        "Units",
+        "Unit Type",
+        "Rate (LKR)",
+        "Payment (LKR)",
+      ];
+      rows = data.map((d) => [
+        d.date,
+        d.estateName,
+        d.sectionName,
+        d.serviceName,
+        d.workerName,
+        d.employeeId,
+        d.units.toString(),
+        d.unitType,
+        d.rate.toLocaleString(),
+        d.payment.toLocaleString(),
+      ]);
+      const totalUnits = data.reduce((sum, d) => sum + d.units, 0);
+      const totalPayment = data.reduce((sum, d) => sum + d.payment, 0);
+      footerRow = ["Total", "", "", "", "", "", totalUnits.toFixed(1), "", "", `LKR ${totalPayment.toLocaleString()}`];
+    } else if (activeFilters.reportType === "payments") {
+      const data = reportData as PaymentReportRow[];
+      title = "Worker Payments Report";
+      headers = [
+        "Employee ID",
+        "Worker Name",
+        "Estate",
+        "Total Units",
+        "Unit Type",
+        "Gross Payment (LKR)",
+      ];
+      rows = data.map((d) => [
+        d.employeeId,
+        d.workerName,
+        d.estateName,
+        d.totalUnits.toString(),
+        d.unitType,
+        d.grossPayment.toLocaleString(),
+      ]);
+      const totalUnits = data.reduce((sum, d) => sum + d.totalUnits, 0);
+      const totalPayment = data.reduce((sum, d) => sum + d.grossPayment, 0);
+      footerRow = ["Total", "", "", totalUnits.toFixed(1), "", `LKR ${totalPayment.toLocaleString()}`];
+    } else if (activeFilters.reportType === "expenses") {
+      const data = reportData as ExpenseReportRow[];
+      title = "Expense Report";
+      headers = ["Date", "Estate", "Category / Section", "Description", "Amount (LKR)", "Status"];
+      rows = data.map((d) => [
+        d.date,
+        d.estateName,
+        d.sectionOrCategory,
+        d.description,
+        d.amount.toLocaleString(),
+        d.status,
+      ]);
+      const totalAmount = data.reduce((sum, d) => sum + d.amount, 0);
+      footerRow = ["Total", "", "", "", `LKR ${totalAmount.toLocaleString()}`, ""];
+    } else if (activeFilters.reportType === "harvest") {
+      const data = reportData as HarvestReportRow[];
+      title = "Harvest Summary Report";
+      headers = [
+        "Estate",
+        "Section",
+        "Total Harvest (KG)",
+        "Total Payment (LKR)",
+        "Workers",
+      ];
+      rows = data.map((d) => [
+        d.estateName,
+        d.sectionName,
+        d.totalHarvest.toString(),
+        d.totalPayment.toLocaleString(),
+        d.workerCount.toString(),
+      ]);
+      const totalHarvest = data.reduce((sum, d) => sum + d.totalHarvest, 0);
+      const totalPayment = data.reduce((sum, d) => sum + d.totalPayment, 0);
+      footerRow = ["Total", "", totalHarvest.toFixed(1), `LKR ${totalPayment.toLocaleString()}`, ""];
+    }
+
+    const isLandscape = activeFilters.reportType === "assignments";
+    const doc = new jsPDF({
+      orientation: isLandscape ? "landscape" : "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Brand header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(153, 161, 175); // light gray
+    doc.text("TEA ESTATE MANAGEMENT SYSTEM", pageWidth - 15, 12, { align: "right" });
+
+    // Main Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(30, 41, 57); // dark slate (#1E2939)
+    doc.text(title, 15, 20);
+
+    // Date period
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(106, 114, 130); // gray
+    doc.text(`Period: ${activeFilters.fromDate} to ${activeFilters.toDate}`, 15, 26);
+
+    // Filters summary
+    const filterParts: string[] = [];
+    if (activeFilters.estateFilter !== "all") {
+      const est = estates.find((e) => e.id === activeFilters.estateFilter);
+      filterParts.push(`Estate: ${est ? est.name : activeFilters.estateFilter}`);
+    }
+    if (activeFilters.sectionFilter !== "all") {
+      filterParts.push(`Section: ${activeFilters.sectionFilter}`);
+    }
+    if (activeFilters.workerFilter !== "all") {
+      const emp = employees.find((e) => e.id === activeFilters.workerFilter);
+      filterParts.push(`Worker: ${emp ? emp.name : activeFilters.workerFilter}`);
+    }
+    if (activeFilters.serviceFilter !== "all") {
+      const ser = services.find((s) => s.id === activeFilters.serviceFilter);
+      filterParts.push(`Service: ${ser ? ser.name : activeFilters.serviceFilter}`);
+    }
+    const filterText = filterParts.length > 0 ? `Filters applied - ${filterParts.join(" | ")}` : "Filters applied - None (All data)";
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(153, 161, 175);
+    doc.text(filterText, 15, 31);
+
+    // Add thin divider line
+    doc.setDrawColor(229, 231, 235); // #E5E7EB
+    doc.setLineWidth(0.3);
+    doc.line(15, 34, pageWidth - 15, 34);
+
+    const totalPagesExp = "{total_pages_count_string}";
+
+    autoTable(doc, {
+      startY: 38,
+      head: [headers],
+      body: rows,
+      foot: [footerRow],
+      theme: "striped",
+      headStyles: {
+        fillColor: [0, 166, 62], // #00A63E
+        textColor: [255, 255, 255],
+        fontSize: 8,
+        fontStyle: "bold",
+        halign: "left",
+      },
+      bodyStyles: {
+        fontSize: 7.5,
+        textColor: [54, 65, 83], // #364153
+      },
+      alternateRowStyles: {
+        fillColor: [249, 250, 251], // #F9FAFB
+      },
+      footStyles: {
+        fillColor: [243, 244, 246], // #F3F4F6
+        textColor: [30, 41, 57], // #1E2939
+        fontSize: 8,
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        // Alignment formatting
+        ...((activeFilters.reportType === "assignments") ? {
+          6: { halign: "right" }, // Units
+          8: { halign: "right" }, // Rate
+          9: { halign: "right" }, // Payment
+        } : {}),
+        ...((activeFilters.reportType === "payments") ? {
+          3: { halign: "right" }, // Total Units
+          5: { halign: "right" }, // Gross Payment
+        } : {}),
+        ...((activeFilters.reportType === "expenses") ? {
+          4: { halign: "right" }, // Amount
+          5: { halign: "center" }, // Status
+        } : {}),
+        ...((activeFilters.reportType === "harvest") ? {
+          2: { halign: "right" }, // Total Harvest
+          3: { halign: "right" }, // Total Payment
+          4: { halign: "center" }, // Workers
+        } : {}),
+      },
+      margin: { left: 15, right: 15 },
+      didDrawPage: (data) => {
+        // Add footer to each page
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(153, 161, 175);
+
+        // Page number
+        doc.text(
+          `Page ${data.pageNumber} of ${totalPagesExp}`,
+          pageWidth - 15,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: "right" }
+        );
+
+        // Report generated stamp
+        const now = new Date();
+        const stamp = `Generated on: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        doc.text(stamp, 15, doc.internal.pageSize.getHeight() - 10);
+      }
+    });
+
+    if (typeof doc.putTotalPages === "function") {
+      doc.putTotalPages(totalPagesExp);
+    }
+
+    doc.save(filename);
   };
 
   // Helper formatting values

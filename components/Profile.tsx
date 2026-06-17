@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "../services/authService";
 
 // --- Types ---
 export interface UserProfile {
@@ -9,6 +10,7 @@ export interface UserProfile {
   address: string;
   role: string;
   memberSince: string;
+  profilePhoto?: string | null;
 }
 
 interface ProfileProps {
@@ -18,6 +20,9 @@ interface ProfileProps {
 
 export default function Profile({ profile, setProfile }: ProfileProps) {
   const router = useRouter();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   // Modal edit states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -107,6 +112,43 @@ export default function Profile({ profile, setProfile }: ProfileProps) {
     }
   };
 
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size should not exceed 5MB");
+      return;
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+      const updatedProfile = await authService.uploadProfilePhoto(file);
+      setProfile((prev) => ({
+        ...prev,
+        profilePhoto: updatedProfile.profilePhoto,
+      }));
+    } catch (error) {
+      console.error("Failed to upload photo:", error);
+      alert("Failed to upload photo. Please try again.");
+    } finally {
+      setIsUploadingPhoto(false);
+      // Reset input value to allow selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <div className="flex-1 h-full flex flex-col overflow-hidden bg-[#F9FAFB]">
       {/* Scroll container */}
@@ -129,15 +171,36 @@ export default function Profile({ profile, setProfile }: ProfileProps) {
           <div className="flex items-end justify-between px-6 -mt-10 pb-4 shrink-0">
             <div className="relative">
               {/* Avatar Box */}
-              <div className="w-[80px] h-[80px] bg-gradient-to-br from-[#00C950] to-[#007A55] rounded-[16px] border-4 border-white shadow-md flex items-center justify-center text-white select-none">
-                <svg className="w-11 h-11 opacity-95" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
-                </svg>
+              <div className="w-[80px] h-[80px] bg-gradient-to-br from-[#00C950] to-[#007A55] rounded-[16px] border-4 border-white shadow-md flex items-center justify-center text-white select-none overflow-hidden relative">
+                {profile.profilePhoto ? (
+                  <img src={profile.profilePhoto} alt="Profile" className={`w-full h-full object-cover ${isUploadingPhoto ? 'opacity-50' : ''}`} />
+                ) : (
+                  <svg className={`w-11 h-11 ${isUploadingPhoto ? 'opacity-50' : 'opacity-95'}`} fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                  </svg>
+                )}
+                {isUploadingPhoto && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                )}
               </div>
               {/* Camera Icon Overlay */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
               <button
                 type="button"
-                className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#00A63E] border-2 border-white rounded-full flex items-center justify-center text-white hover:bg-[#009966] transition-colors shadow-xs cursor-pointer focus:outline-none"
+                onClick={handlePhotoClick}
+                disabled={isUploadingPhoto}
+                className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#00A63E] border-2 border-white rounded-full flex items-center justify-center text-white hover:bg-[#009966] transition-colors shadow-xs cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Change Avatar"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export interface Section {
   id: string;
   name: string;
-  area: number;
-  description: string;
+  area?: number;
+  description?: string;
 }
 
 export interface Estate {
@@ -12,8 +12,8 @@ export interface Estate {
   name: string;
   location: string;
   mapsLink: string;
-  area: number;
-  establishedYear: number;
+  area?: number;
+  establishedYear?: number;
   planter: string;
   supervisor: string;
   status: "active" | "inactive";
@@ -55,8 +55,29 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
   const [sectionDesc, setSectionDesc] = useState("");
   const [sectionFormError, setSectionFormError] = useState("");
 
+  // Ref to track the last saved/added estate so we can preserve active selection when server ID syncs
+  const lastSavedEstateRef = useRef<{ name: string; location: string } | null>(null);
+
   // Active Selected Estate details
   const activeEstate = estates.find((e) => e.id === activeEstateId) || estates[0];
+
+  // Sync activeEstateId if the active estate's ID changed (e.g. after optimistic server mutation)
+  useEffect(() => {
+    if (activeEstateId && !estates.some((e) => e.id === activeEstateId)) {
+      if (lastSavedEstateRef.current) {
+        const { name, location } = lastSavedEstateRef.current;
+        const matched = estates.find((e) => e.name === name && e.location === location);
+        if (matched) {
+          setActiveEstateId(matched.id);
+          lastSavedEstateRef.current = null; // Reset
+          return;
+        }
+      }
+      if (estates.length > 0) {
+        setActiveEstateId(estates[0].id);
+      }
+    }
+  }, [estates, activeEstateId]);
 
   // --- Handlers ---
 
@@ -67,8 +88,8 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
       setEstateName(estate.name);
       setEstateLocation(estate.location);
       setEstateMapsLink(estate.mapsLink);
-      setEstateArea(estate.area);
-      setEstateEst(estate.establishedYear);
+      setEstateArea(estate.area ?? "");
+      setEstateEst(estate.establishedYear ?? "");
       setEstatePlanter(estate.planter);
       setEstateSupervisor(estate.supervisor);
       setEstateStatus(estate.status);
@@ -95,8 +116,12 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
       return;
     }
 
-    const areaNum = Number(estateArea) || 0;
-    const estNum = Number(estateEst) || new Date().getFullYear();
+    // Parse numeric fields safely. Send undefined if empty or not positive/valid.
+    const areaNum = (estateArea !== "" && Number(estateArea) > 0) ? Number(estateArea) : undefined;
+    const estNum = (estateEst !== "" && Number(estateEst) >= 1800 && Number(estateEst) <= 2100) ? Number(estateEst) : undefined;
+
+    // Save name and location for active selection syncing
+    lastSavedEstateRef.current = { name: estateName, location: estateLocation };
 
     if (editingEstate) {
       // Edit
@@ -155,8 +180,8 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
     if (section && activeEstate) {
       setEditingSection({ section, estateId: activeEstate.id });
       setSectionName(section.name);
-      setSectionArea(section.area);
-      setSectionDesc(section.description);
+      setSectionArea(section.area ?? "");
+      setSectionDesc(section.description || "");
     } else {
       setEditingSection(null);
       setSectionName("");
@@ -176,7 +201,8 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
     }
     if (!activeEstate) return;
 
-    const areaNum = Number(sectionArea) || 0;
+    // Parse area safely. Send undefined if empty or not positive/valid.
+    const areaNum = (sectionArea !== "" && Number(sectionArea) > 0) ? Number(sectionArea) : undefined;
 
     if (editingSection) {
       // Edit
@@ -279,7 +305,7 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
                           className={`w-2 h-2 rounded-full ${
                             est.status === "active"
                               ? "bg-[#00C950]"
-                              : "bg-[#D1D5DC]"
+                              : "bg-red-500"
                           }`}
                         />
                         <h3 className="text-base font-medium text-[#1E2939] leading-tight">
@@ -312,11 +338,11 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
 
                       {/* Quick Specs */}
                       <div className="flex items-center gap-1.5 text-xs text-[#99A1AF] mt-1">
-                        <span>{est.area} ha</span>
+                        <span>{est.area ? `${est.area} ha` : "— ha"}</span>
                         <span>·</span>
                         <span>{est.sections.length} sections</span>
                         <span>·</span>
-                        <span>Est. {est.establishedYear}</span>
+                        <span>{est.establishedYear ? `Est. ${est.establishedYear}` : "Est. —"}</span>
                       </div>
 
                       {/* Planter */}
@@ -370,7 +396,7 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
                   {activeEstate.name}
                 </h2>
                 <p className="text-xs font-normal text-[#6A7282] mt-0.5">
-                  {activeEstate.sections.length} sections · {activeEstate.area} hectares total
+                  {activeEstate.sections.length} sections · {activeEstate.area ? `${activeEstate.area} hectares total` : "— hectares total"}
                 </p>
               </div>
               <button
@@ -422,7 +448,7 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
                             </div>
                           </div>
                           <div className="text-xs font-normal text-[#6A7282] mt-0.5">
-                            {sec.area} hectares
+                            {sec.area ? `${sec.area} hectares` : "— hectares"}
                           </div>
                         </div>
                         {sec.description && (
@@ -454,11 +480,15 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
                 <div className="grid grid-cols-2 gap-y-3.5 gap-x-8">
                   <div className="flex items-center gap-2 text-sm text-[#6A7282]">
                     <span className="font-normal">Established:</span>
-                    <span className="font-medium text-[#1E2939]">{activeEstate.establishedYear}</span>
+                    <span className="font-medium text-[#1E2939]">{activeEstate.establishedYear || "—"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-[#6A7282]">
                     <span className="font-normal">Status:</span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#ECFDF5] text-[#047857] capitalize border border-[#B9F8CF]">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize border ${
+                      activeEstate.status === "active" 
+                        ? "bg-[#ECFDF5] text-[#047857] border-[#B9F8CF]" 
+                        : "bg-red-50 text-red-700 border-red-200"
+                    }`}>
                       {activeEstate.status}
                     </span>
                   </div>
