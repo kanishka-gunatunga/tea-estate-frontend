@@ -256,17 +256,17 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
             </div>
 
             {/* Status Filter Selector */}
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-[38px] px-3 pr-8 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#00A63E] rounded-[10px] text-sm outline-none transition-all cursor-pointer text-gray-800 bg-none select-none"
-              >
-                <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
+            {/*<div className="relative">*/}
+            {/*  <select*/}
+            {/*    value={statusFilter}*/}
+            {/*    onChange={(e) => setStatusFilter(e.target.value)}*/}
+            {/*    className="h-[38px] px-3 pr-8 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#00A63E] rounded-[10px] text-sm outline-none transition-all cursor-pointer text-gray-800 bg-none select-none"*/}
+            {/*  >*/}
+            {/*    <option value="all">All Statuses</option>*/}
+            {/*    <option value="active">Active</option>*/}
+            {/*    <option value="inactive">Inactive</option>*/}
+            {/*  </select>*/}
+            {/*</div>*/}
 
           </div>
 
