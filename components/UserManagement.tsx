@@ -23,6 +23,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
   // Filter/Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Modal states
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -49,7 +50,8 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   // --- Handlers ---
@@ -250,6 +252,19 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
                 <option value="Administrator">Administrator</option>
                 <option value="Planter">Planter</option>
                 <option value="Supervisor">Supervisor</option>
+              </select>
+            </div>
+
+            {/* Status Filter Selector */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-[38px] px-3 pr-8 bg-[#F9FAFB] border border-[#E5E7EB] focus:border-[#00A63E] rounded-[10px] text-sm outline-none transition-all cursor-pointer text-gray-800 bg-none select-none"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
 

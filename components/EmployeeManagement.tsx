@@ -27,8 +27,8 @@ export default function EmployeeManagement({
   estates,
   services,
 }: EmployeeManagementProps) {
-  // Get active categories dynamically from services list
-  const SERVICE_CATEGORIES = services.filter((s) => s.status === "active").map((s) => s.name);
+  // Get categories dynamically from services list
+  const SERVICE_CATEGORIES = services.map((s) => s.name);
   // Filter/Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [estateFilter, setEstateFilter] = useState("all");
@@ -491,7 +491,7 @@ export default function EmployeeManagement({
                     placeholder="Enter full name"
                     value={empName}
                     onChange={(e) => setEmpName(e.target.value)}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400"
+                    className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
                     required
                   />
                 </div>
@@ -504,7 +504,7 @@ export default function EmployeeManagement({
                     placeholder="EMP009"
                     value={empId}
                     onChange={(e) => setEmpId(e.target.value)}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400 bg-gray-50/50"
+                    className="w-full h-10 bg-gray-50 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -520,7 +520,7 @@ export default function EmployeeManagement({
                     placeholder="+94 77 000 0000"
                     value={empPhone}
                     onChange={(e) => setEmpPhone(e.target.value)}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400"
+                    className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
                   />
                 </div>
                 <div className="flex flex-col">
@@ -530,7 +530,7 @@ export default function EmployeeManagement({
                   <select
                     value={empGender}
                     onChange={(e) => setEmpGender(e.target.value as "Male" | "Female" | "Other")}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
+                    className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3 text-sm text-gray-900 outline-none transition-all cursor-pointer"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -573,7 +573,7 @@ export default function EmployeeManagement({
                     placeholder="453213234v"
                     value={empNic}
                     onChange={(e) => setEmpNic(e.target.value)}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-black outline-none transition-all placeholder-gray-400"
+                    className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
                     required
                   />
                 </div>
@@ -584,7 +584,7 @@ export default function EmployeeManagement({
                   <select
                     value={empEstateId}
                     onChange={(e) => setEmpEstateId(e.target.value)}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
+                    className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3 text-sm text-gray-900 outline-none transition-all cursor-pointer"
                   >
                     <option value="">Select Estate</option>
                     {estates.map((est) => (
@@ -604,7 +604,7 @@ export default function EmployeeManagement({
                 <select
                   value={empStatus}
                   onChange={(e) => setEmpStatus(e.target.value as "active" | "inactive")}
-                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
+                  className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3 text-sm text-gray-900 outline-none transition-all cursor-pointer"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
