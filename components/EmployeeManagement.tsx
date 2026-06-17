@@ -136,16 +136,16 @@ export default function EmployeeManagement({
         prev.map((e) =>
           e.id === editingEmployee.id
             ? {
-                ...e,
-                name: empName,
-                id: empId,
-                phone: empPhone,
-                gender: empGender,
-                serviceCategories: empCategories,
-                nic: empNic,
-                estateId: empEstateId,
-                status: empStatus,
-              }
+              ...e,
+              name: empName,
+              id: empId,
+              phone: empPhone,
+              gender: empGender,
+              serviceCategories: empCategories,
+              nic: empNic,
+              estateId: empEstateId,
+              status: empStatus,
+            }
             : e
         )
       );
@@ -228,7 +228,7 @@ export default function EmployeeManagement({
 
       {/* Filter Row Block */}
       <div className="flex items-center gap-3 shrink-0 flex-wrap no-print">
-        
+
         {/* Search Input */}
         <div className="relative w-[384px] shrink-0">
           <input
@@ -285,31 +285,28 @@ export default function EmployeeManagement({
         <div className="bg-[#F3F4F6] rounded-[14px] p-1 flex items-center gap-1.5">
           <button
             onClick={() => setStatusFilter("all")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg select-none cursor-pointer transition-all ${
-              statusFilter === "all"
-                ? "bg-white text-[#1E2939] shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
-                : "text-[#6A7282] hover:text-[#1E2939]"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg select-none cursor-pointer transition-all ${statusFilter === "all"
+              ? "bg-white text-[#1E2939] shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
+              : "text-[#6A7282] hover:text-[#1E2939]"
+              }`}
           >
             All
           </button>
           <button
             onClick={() => setStatusFilter("active")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg select-none cursor-pointer transition-all ${
-              statusFilter === "active"
-                ? "bg-white text-[#1E2939] shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
-                : "text-[#6A7282] hover:text-[#1E2939]"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg select-none cursor-pointer transition-all ${statusFilter === "active"
+              ? "bg-white text-[#1E2939] shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
+              : "text-[#6A7282] hover:text-[#1E2939]"
+              }`}
           >
             Active
           </button>
           <button
             onClick={() => setStatusFilter("inactive")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg select-none cursor-pointer transition-all ${
-              statusFilter === "inactive"
-                ? "bg-white text-[#1E2939] shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
-                : "text-[#6A7282] hover:text-[#1E2939]"
-            }`}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg select-none cursor-pointer transition-all ${statusFilter === "inactive"
+              ? "bg-white text-[#1E2939] shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
+              : "text-[#6A7282] hover:text-[#1E2939]"
+              }`}
           >
             Inactive
           </button>
@@ -319,7 +316,7 @@ export default function EmployeeManagement({
 
       {/* Dashboard Table Workspace */}
       <div className="bg-white border border-[#F3F4F6] rounded-2xl shadow-sm overflow-hidden flex flex-col shrink-0">
-        
+
         <div className="overflow-x-auto">
           {filteredEmployees.length > 0 ? (
             <table className="w-full min-w-[1100px] text-left border-collapse">
@@ -338,7 +335,7 @@ export default function EmployeeManagement({
               <tbody className="divide-y divide-gray-100">
                 {filteredEmployees.map((emp) => {
                   const assignedEstate = estates.find((est) => est.id === emp.estateId);
-                  
+
                   // Gender color coding
                   const isFemale = emp.gender === "Female";
                   const avatarBg = isFemale ? "bg-[#FCE7F3]" : "bg-[#DBEAFE]";
@@ -346,7 +343,7 @@ export default function EmployeeManagement({
 
                   return (
                     <tr key={emp.id} className="hover:bg-gray-50/60 transition-colors border-b border-[#F9FAFB] h-[61px]">
-                      
+
                       {/* Name and Gender Subtitle */}
                       <td className="px-6 py-2.5">
                         <div className="flex items-center gap-3">
@@ -394,11 +391,10 @@ export default function EmployeeManagement({
                       {/* Status badge */}
                       <td className="px-6 py-2.5">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-normal capitalize ${
-                            emp.status === "active"
-                              ? "bg-[#DCFCE7] text-[#008236] border border-transparent"
-                              : "bg-gray-100 text-gray-500 border border-transparent"
-                          }`}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-normal capitalize ${emp.status === "active"
+                            ? "bg-[#DCFCE7] text-[#008236] border border-transparent"
+                            : "bg-gray-100 text-gray-500 border border-transparent"
+                            }`}
                         >
                           {emp.status}
                         </span>
@@ -456,7 +452,7 @@ export default function EmployeeManagement({
       {isEmployeeModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[488px] overflow-hidden animate-in fade-in-50 zoom-in-95 duration-200">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">
@@ -503,6 +499,7 @@ export default function EmployeeManagement({
                     type="text"
                     placeholder="EMP009"
                     value={empId}
+                    disabled
                     onChange={(e) => setEmpId(e.target.value)}
                     className="w-full h-10 bg-gray-50 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
                   />
