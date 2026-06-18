@@ -468,37 +468,21 @@ export default function Expenses({ expenses, setExpenses, estates }: ExpensesPro
                 />
               </div>
 
-              {/* Grid Amount & Status */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <label className="text-xs font-semibold text-gray-600 mb-1 font-sans">
-                    Amount (LKR) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    value={expenseAmount}
-                    onChange={(e) => setExpenseAmount(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm outline-none transition-all placeholder-gray-400 text-gray-800 font-sans"
-                    min="0.01"
-                    step="0.01"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="text-xs font-semibold text-gray-600 mb-1 font-sans">
-                    Status
-                  </label>
-                  <select
-                    value={expenseStatus}
-                    onChange={(e) => setExpenseStatus(e.target.value as "pending" | "approved" | "rejected")}
-                    className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm outline-none transition-all cursor-pointer text-gray-800 font-sans font-medium"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
+              {/* Amount */}
+              <div className="flex flex-col">
+                <label className="text-xs font-semibold text-gray-600 mb-1 font-sans">
+                  Amount (LKR) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={expenseAmount}
+                  onChange={(e) => setExpenseAmount(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm outline-none transition-all placeholder-gray-400 text-gray-800 font-sans"
+                  min="0.01"
+                  step="0.01"
+                  required
+                />
               </div>
 
               {/* Grid Estate & Section */}
