@@ -484,17 +484,6 @@ export default function DailyAssignmentComponent({
                         <span className="text-gray-800 font-semibold text-sm">
                           {service ? service.name : "Unknown Service"}
                         </span>
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize tracking-wide ${
-                            assignment.status === "approved"
-                              ? "bg-[#DCFCE7] text-[#008236]"
-                              : assignment.status === "completed"
-                              ? "bg-blue-50 text-blue-700"
-                              : "bg-orange-50 text-orange-700"
-                          }`}
-                        >
-                          {assignment.status}
-                        </span>
                       </div>
                       <span className="text-gray-400 text-xs font-normal">
                         {estate ? estate.name : "Unknown Estate"} · {section ? section.name : "Unknown Section"}
