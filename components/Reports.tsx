@@ -7,15 +7,9 @@ import { Expense } from "./Expenses";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// --- Types ---
-interface ReportsProps {
-  estates: Estate[];
-  employees: Employee[];
-  services: Service[];
-  assignments: DailyAssignment[];
-  expenses: Expense[];
-}
+import { useEstatesQuery, useEmployeesQuery, useServicesQuery, useExpensesQuery, useAssignmentsQuery } from "@/hooks/hooks";
 
+// --- Types ---
 type ReportType = "payments" | "assignments" | "expenses" | "harvest";
 
 interface AssignmentReportRow {
@@ -67,13 +61,19 @@ interface ActiveFilters {
   serviceFilter: string;
 }
 
-export default function Reports({
-  estates,
-  employees,
-  services,
-  assignments,
-  expenses,
-}: ReportsProps) {
+export default function Reports() {
+  const { data: serverEstates } = useEstatesQuery();
+  const { data: serverEmployees } = useEmployeesQuery();
+  const { data: serverServices } = useServicesQuery();
+  const { data: serverExpenses } = useExpensesQuery();
+  const { data: serverAssignments } = useAssignmentsQuery();
+
+  const estates = (serverEstates as Estate[]) || [];
+  const employees = (serverEmployees as Employee[]) || [];
+  const services = (serverServices as Service[]) || [];
+  const expenses = (serverExpenses as Expense[]) || [];
+  const assignments = (serverAssignments as DailyAssignment[]) || [];
+  
   // Input states updated directly by fields
   const [reportType, setReportType] = useState<ReportType>("assignments");
   const [fromDate, setFromDate] = useState("2026-05-01");

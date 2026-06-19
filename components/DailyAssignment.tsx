@@ -21,23 +21,22 @@ export interface DailyAssignment {
   status: "pending" | "approved" | "completed";
 }
 
-interface DailyAssignmentProps {
-  assignments: DailyAssignment[];
-  setAssignments: React.Dispatch<React.SetStateAction<DailyAssignment[]>>;
-  estates: Estate[];
-  employees: Employee[];
-  services: Service[];
-}
+import { useAssignmentsQuery, useEstatesQuery, useEmployeesQuery, useServicesQuery, useCreateAssignmentMutation, useUpdateAssignmentMutation, useDeleteAssignmentMutation } from "@/hooks/hooks";
 
+export default function DailyAssignmentComponent() {
+  const { data: serverAssignments } = useAssignmentsQuery();
+  const { data: serverEstates } = useEstatesQuery();
+  const { data: serverEmployees } = useEmployeesQuery();
+  const { data: serverServices } = useServicesQuery();
+  
+  const assignments = (serverAssignments as DailyAssignment[]) || [];
+  const estates = (serverEstates as Estate[]) || [];
+  const employees = (serverEmployees as Employee[]) || [];
+  const services = (serverServices as Service[]) || [];
 
-
-export default function DailyAssignmentComponent({
-  assignments,
-  setAssignments,
-  estates,
-  employees,
-  services,
-}: DailyAssignmentProps) {
+  const createAssignment = useCreateAssignmentMutation();
+  const updateAssignment = useUpdateAssignmentMutation();
+  const deleteAssignment = useDeleteAssignmentMutation();
   // Date picker selection state (defaulting to 2026-06-15)
   const [selectedDate, setSelectedDate] = useState("2026-06-15");
 
@@ -98,7 +97,7 @@ export default function DailyAssignmentComponent({
   // Delete entire assignment
   const handleDeleteAssignment = (id: string) => {
     if (confirm("Are you sure you want to delete this assignment?")) {
-      setAssignments((prev) => prev.filter((a) => a.id !== id));
+      deleteAssignment.mutate(id);
     }
   };
 
@@ -121,32 +120,31 @@ export default function DailyAssignmentComponent({
 
     const unitsNum = Number(editUnitsValue);
 
-    setAssignments((prev) =>
-      prev.map((a) => {
-        if (a.id !== assignmentId) return a;
+    const assignmentToUpdate = assignments.find(a => a.id === assignmentId);
+    if (!assignmentToUpdate) return;
 
-        const rateDetails = getServiceRateDetails(a.serviceId);
-        const ratePerUnit = rateDetails ? rateDetails.rate : 0;
+    const rateDetails = getServiceRateDetails(assignmentToUpdate.serviceId);
+    const ratePerUnit = rateDetails ? rateDetails.rate : 0;
 
-        const updatedWorkerAssignments = a.assignments.map((wa) => {
-          if (wa.employeeId !== employeeId) return wa;
-          const payment = Math.round(unitsNum * ratePerUnit * 100) / 100;
-          return {
-            ...wa,
-            unitsCompleted: unitsNum,
-            paymentAmount: payment,
-          };
-        });
+    const updatedWorkerAssignments = assignmentToUpdate.assignments.map((wa) => {
+      if (wa.employeeId !== employeeId) return wa;
+      const payment = Math.round(unitsNum * ratePerUnit * 100) / 100;
+      return {
+        ...wa,
+        unitsCompleted: unitsNum,
+        paymentAmount: payment,
+      };
+    });
 
-        const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
+    const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
 
-        return {
-          ...a,
-          assignments: updatedWorkerAssignments,
-          totalAmount: newTotal,
-        };
-      })
-    );
+    updateAssignment.mutate({
+      id: assignmentId,
+      payload: {
+        assignments: updatedWorkerAssignments,
+        totalAmount: newTotal,
+      }
+    });
 
     setEditingWorkerId(null);
     setEditUnitsValue("");
@@ -155,20 +153,19 @@ export default function DailyAssignmentComponent({
   // Delete worker from assignment
   const handleDeleteWorkerRow = (assignmentId: string, employeeId: string) => {
     if (confirm("Are you sure you want to remove this worker from the assignment?")) {
-      setAssignments((prev) =>
-        prev.map((a) => {
-          if (a.id !== assignmentId) return a;
+      const assignmentToUpdate = assignments.find(a => a.id === assignmentId);
+      if (!assignmentToUpdate) return;
 
-          const updatedWorkerAssignments = a.assignments.filter((wa) => wa.employeeId !== employeeId);
-          const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
+      const updatedWorkerAssignments = assignmentToUpdate.assignments.filter((wa) => wa.employeeId !== employeeId);
+      const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
 
-          return {
-            ...a,
-            assignments: updatedWorkerAssignments,
-            totalAmount: newTotal,
-          };
-        })
-      );
+      updateAssignment.mutate({
+        id: assignmentId,
+        payload: {
+          assignments: updatedWorkerAssignments,
+          totalAmount: newTotal,
+        }
+      });
     }
   };
 
@@ -185,30 +182,29 @@ export default function DailyAssignmentComponent({
 
     const unitsNum = Number(addWorkerUnits);
 
-    setAssignments((prev) =>
-      prev.map((a) => {
-        if (a.id !== assignmentId) return a;
+    const assignmentToUpdate = assignments.find(a => a.id === assignmentId);
+    if (!assignmentToUpdate) return;
 
-        const rateDetails = getServiceRateDetails(a.serviceId);
-        const ratePerUnit = rateDetails ? rateDetails.rate : 0;
-        const payment = Math.round(unitsNum * ratePerUnit * 100) / 100;
+    const rateDetails = getServiceRateDetails(assignmentToUpdate.serviceId);
+    const ratePerUnit = rateDetails ? rateDetails.rate : 0;
+    const payment = Math.round(unitsNum * ratePerUnit * 100) / 100;
 
-        const newWorkerAssignment: WorkerAssignment = {
-          employeeId: addWorkerId,
-          unitsCompleted: unitsNum,
-          paymentAmount: payment,
-        };
+    const newWorkerAssignment: WorkerAssignment = {
+      employeeId: addWorkerId,
+      unitsCompleted: unitsNum,
+      paymentAmount: payment,
+    };
 
-        const updatedWorkerAssignments = [...a.assignments, newWorkerAssignment];
-        const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
+    const updatedWorkerAssignments = [...assignmentToUpdate.assignments, newWorkerAssignment];
+    const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
 
-        return {
-          ...a,
-          assignments: updatedWorkerAssignments,
-          totalAmount: newTotal,
-        };
-      })
-    );
+    updateAssignment.mutate({
+      id: assignmentId,
+      payload: {
+        assignments: updatedWorkerAssignments,
+        totalAmount: newTotal,
+      }
+    });
 
     setAddWorkerForId(null);
     setAddWorkerId("");
@@ -223,8 +219,7 @@ export default function DailyAssignmentComponent({
       return;
     }
 
-    const newAssignment: DailyAssignment = {
-      id: `da-${Date.now()}`,
+    const newAssignment = {
       date: selectedDate,
       estateId: newFormEstateId,
       sectionId: newFormSectionId,
@@ -234,14 +229,18 @@ export default function DailyAssignmentComponent({
       status: "pending",
     };
 
-    setAssignments((prev) => [...prev, newAssignment]);
+    createAssignment.mutate(newAssignment, {
+      onSuccess: (data: any) => {
+        if (data && data.id) {
+          setAddWorkerForId(data.id);
+        }
+      }
+    });
+
     setShowAddForm(false);
     setNewFormEstateId("");
     setNewFormSectionId("");
     setNewFormServiceId("");
-
-    // Auto expand the newly created card and open add worker form
-    setAddWorkerForId(newAssignment.id);
   };
 
   // Derived stats

@@ -8,7 +8,7 @@ import { Employee } from "@/components/EmployeeManagement";
 import { Service } from "@/components/ServiceManagement";
 import { DailyAssignment } from "@/components/DailyAssignment";
 import { Expense } from "@/components/Expenses";
-import { useBackupsQuery, useCreateBackupMutation, useDeleteBackupMutation } from "@/hooks/hooks";
+import { useBackupsQuery, useCreateBackupMutation, useDeleteBackupMutation, useEstatesQuery, useUsersQuery, useEmployeesQuery, useServicesQuery, useExpensesQuery, useAssignmentsQuery } from "@/hooks/hooks";
 import { api } from "@/services/api";
 
 interface BackupRecord {
@@ -21,23 +21,20 @@ interface BackupRecord {
   status: "success" | "failed";
 }
 
-interface BackupsProps {
-  estates: Estate[];
-  users: User[];
-  employees: Employee[];
-  services: Service[];
-  expenses: Expense[];
-  assignments: DailyAssignment[];
-}
+export default function Backups() {
+  const { data: serverEstates } = useEstatesQuery();
+  const { data: serverUsers } = useUsersQuery();
+  const { data: serverEmployees } = useEmployeesQuery();
+  const { data: serverServices } = useServicesQuery();
+  const { data: serverExpenses } = useExpensesQuery();
+  const { data: serverAssignments } = useAssignmentsQuery();
 
-export default function Backups({
-  estates,
-  users,
-  employees,
-  services,
-  expenses,
-  assignments,
-}: BackupsProps) {
+  const estates = (serverEstates as Estate[]) || [];
+  const users = (serverUsers as User[]) || [];
+  const employees = (serverEmployees as Employee[]) || [];
+  const services = (serverServices as Service[]) || [];
+  const expenses = (serverExpenses as Expense[]) || [];
+  const assignments = (serverAssignments as DailyAssignment[]) || [];
   const { data: serverBackups } = useBackupsQuery();
   const createBackupMutation = useCreateBackupMutation();
   const deleteBackupMutation = useDeleteBackupMutation();

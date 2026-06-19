@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Estate } from "./EstateManagement";
 
+import { useEventsQuery, useEstatesQuery, useCreateEventMutation, useUpdateEventMutation, useDeleteEventMutation } from "@/hooks/hooks";
+
 // --- Types ---
 export interface CalendarEvent {
   id: string;
@@ -14,12 +16,6 @@ export interface CalendarEvent {
   estateId?: string;
 }
 
-interface RemindersProps {
-  events: CalendarEvent[];
-  setEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
-  estates: Estate[];
-}
-
 const eventColors = ["#16a34a", "#2563eb", "#9333ea", "#dc2626", "#ea580c", "#0891b2", "#d97706"];
 const eventCategories = ["Meeting", "Cultivation", "Maintenance", "Review", "Finance", "Training", "Other"];
 
@@ -31,7 +27,16 @@ function getFirstDayOfMonth(year: number, month: number) {
   return new Date(year, month, 1).getDay();
 }
 
-export default function Reminders({ events, setEvents, estates }: RemindersProps) {
+export default function Reminders() {
+  const { data: serverEvents } = useEventsQuery();
+  const { data: serverEstates } = useEstatesQuery();
+
+  const events = (serverEvents as CalendarEvent[]) || [];
+  const estates = (serverEstates as Estate[]) || [];
+
+  const createEvent = useCreateEventMutation();
+  const updateEvent = useUpdateEventMutation();
+  const deleteEvent = useDeleteEventMutation();
   // Navigation month state (June 2026 default)
   const [currentDate, setCurrentDate] = useState(new Date(2026, 5, 1));
   const [selectedDay, setSelectedDay] = useState<number | null>(18);
@@ -146,27 +151,22 @@ export default function Reminders({ events, setEvents, estates }: RemindersProps
 
     if (editingEvent) {
       // Edit
-      setEvents((prev) =>
-        prev.map((evt) =>
-          evt.id === editingEvent.id
-            ? {
-                ...evt,
-                title: eventTitle,
-                description: eventDesc,
-                startDate: eventStartDate,
-                endDate: eventEndDate || undefined,
-                recurrence: eventRecurrence,
-                color: eventColor,
-                category: eventCategory,
-                estateId: eventEstateId || undefined,
-              }
-            : evt
-        )
-      );
+      updateEvent.mutate({
+        id: editingEvent.id,
+        payload: {
+          title: eventTitle,
+          description: eventDesc,
+          startDate: eventStartDate,
+          endDate: eventEndDate || undefined,
+          recurrence: eventRecurrence,
+          color: eventColor,
+          category: eventCategory,
+          estateId: eventEstateId || undefined,
+        }
+      });
     } else {
       // Add
-      const newEvent: CalendarEvent = {
-        id: `ev-${Date.now()}`,
+      const newEvent = {
         title: eventTitle,
         description: eventDesc,
         startDate: eventStartDate,
@@ -176,7 +176,7 @@ export default function Reminders({ events, setEvents, estates }: RemindersProps
         category: eventCategory,
         estateId: eventEstateId || undefined,
       };
-      setEvents((prev) => [...prev, newEvent]);
+      createEvent.mutate(newEvent);
     }
 
     setIsModalOpen(false);
@@ -185,7 +185,7 @@ export default function Reminders({ events, setEvents, estates }: RemindersProps
   // Delete Event
   const handleDeleteEvent = (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete the event: "${title}"?`)) {
-      setEvents((prev) => prev.filter((evt) => evt.id !== id));
+      deleteEvent.mutate(id);
     }
   };
 
