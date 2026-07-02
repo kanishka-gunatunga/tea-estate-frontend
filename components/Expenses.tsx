@@ -99,7 +99,8 @@ export default function Expenses() {
       setExpenseCategory("Transport");
       setExpenseDesc("");
       setExpenseAmount("");
-      setExpenseEstateId(estates.length > 0 ? estates[0].id : "");
+      const firstActiveEstate = estates.find((est) => est.status === "active");
+      setExpenseEstateId(firstActiveEstate ? firstActiveEstate.id : "");
       setExpenseSectionId("");
       setExpenseStatus("pending");
     }
@@ -500,11 +501,13 @@ export default function Expenses() {
                     className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm outline-none transition-all cursor-pointer text-gray-800 font-sans font-medium"
                     required
                   >
-                    {estates.map((est) => (
-                      <option key={est.id} value={est.id}>
-                        {est.name}
-                      </option>
-                    ))}
+                    {estates
+                      .filter((est) => est.status === "active" || est.id === expenseEstateId)
+                      .map((est) => (
+                        <option key={est.id} value={est.id}>
+                          {est.name} {est.status === "inactive" ? "(Inactive)" : ""}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className="flex flex-col">

@@ -94,9 +94,9 @@ export default function Dashboard() {
 
   // KPI 2: Plucked KG
   const totalPluckedKg = useMemo(() => {
-    // Sum unitsCompleted in assignments where service is Leaf Plucking (service-6) and approved
+    // Sum unitsCompleted in assignments where service is Leaf Plucking (unitType === KG) and approved
     return filteredAssignments
-      .filter((da) => da.serviceId === "service-6" && da.status === "approved")
+      .filter((da) => da.unitType === "KG" && da.status === "approved")
       .reduce((sum, da) => {
         const daSum = da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
         return sum + daSum;
@@ -233,7 +233,7 @@ export default function Dashboard() {
     return activeEstate.sections.map((section: any) => {
       // Sum unitsCompleted for this section's leaf pluck assignments in filtered range
       const pluckSum = filteredAssignments
-        .filter((da) => da.sectionId === section.id && da.serviceId === "service-6" && da.status === "approved")
+        .filter((da) => da.sectionId === section.id && da.unitType === "KG" && da.status === "approved")
         .reduce((sum, da) => {
           const daSum = da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
           return sum + daSum;

@@ -21,7 +21,18 @@ export interface DailyAssignment {
   status: "pending" | "approved" | "completed";
 }
 
-import { useAssignmentsQuery, useEstatesQuery, useEmployeesQuery, useServicesQuery, useCreateAssignmentMutation, useUpdateAssignmentMutation, useDeleteAssignmentMutation } from "@/hooks/hooks";
+import {
+  useAssignmentsQuery,
+  useEstatesQuery,
+  useEmployeesQuery,
+  useServicesQuery,
+  useCreateAssignmentMutation,
+  useUpdateAssignmentMutation,
+  useDeleteAssignmentMutation,
+  useAddWorkerMutation,
+  useUpdateWorkerMutation,
+  useRemoveWorkerMutation
+} from "@/hooks/hooks";
 
 export default function DailyAssignmentComponent() {
   const { data: serverAssignments } = useAssignmentsQuery();
@@ -37,6 +48,9 @@ export default function DailyAssignmentComponent() {
   const createAssignment = useCreateAssignmentMutation();
   const updateAssignment = useUpdateAssignmentMutation();
   const deleteAssignment = useDeleteAssignmentMutation();
+  const addWorker = useAddWorkerMutation();
+  const updateWorker = useUpdateWorkerMutation();
+  const removeWorker = useRemoveWorkerMutation();
   // Date picker selection state (defaulting to 2026-06-15)
   const [selectedDate, setSelectedDate] = useState("2026-06-15");
 
@@ -120,30 +134,10 @@ export default function DailyAssignmentComponent() {
 
     const unitsNum = Number(editUnitsValue);
 
-    const assignmentToUpdate = assignments.find(a => a.id === assignmentId);
-    if (!assignmentToUpdate) return;
-
-    const rateDetails = getServiceRateDetails(assignmentToUpdate.serviceId);
-    const ratePerUnit = rateDetails ? rateDetails.rate : 0;
-
-    const updatedWorkerAssignments = assignmentToUpdate.assignments.map((wa) => {
-      if (wa.employeeId !== employeeId) return wa;
-      const payment = Math.round(unitsNum * ratePerUnit * 100) / 100;
-      return {
-        ...wa,
-        unitsCompleted: unitsNum,
-        paymentAmount: payment,
-      };
-    });
-
-    const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
-
-    updateAssignment.mutate({
-      id: assignmentId,
-      payload: {
-        assignments: updatedWorkerAssignments,
-        totalAmount: newTotal,
-      }
+    updateWorker.mutate({
+      assignmentId,
+      employeeId,
+      payload: { unitsCompleted: unitsNum },
     });
 
     setEditingWorkerId(null);
@@ -153,19 +147,7 @@ export default function DailyAssignmentComponent() {
   // Delete worker from assignment
   const handleDeleteWorkerRow = (assignmentId: string, employeeId: string) => {
     if (confirm("Are you sure you want to remove this worker from the assignment?")) {
-      const assignmentToUpdate = assignments.find(a => a.id === assignmentId);
-      if (!assignmentToUpdate) return;
-
-      const updatedWorkerAssignments = assignmentToUpdate.assignments.filter((wa) => wa.employeeId !== employeeId);
-      const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
-
-      updateAssignment.mutate({
-        id: assignmentId,
-        payload: {
-          assignments: updatedWorkerAssignments,
-          totalAmount: newTotal,
-        }
-      });
+      removeWorker.mutate({ assignmentId, employeeId });
     }
   };
 
@@ -182,28 +164,12 @@ export default function DailyAssignmentComponent() {
 
     const unitsNum = Number(addWorkerUnits);
 
-    const assignmentToUpdate = assignments.find(a => a.id === assignmentId);
-    if (!assignmentToUpdate) return;
-
-    const rateDetails = getServiceRateDetails(assignmentToUpdate.serviceId);
-    const ratePerUnit = rateDetails ? rateDetails.rate : 0;
-    const payment = Math.round(unitsNum * ratePerUnit * 100) / 100;
-
-    const newWorkerAssignment: WorkerAssignment = {
-      employeeId: addWorkerId,
-      unitsCompleted: unitsNum,
-      paymentAmount: payment,
-    };
-
-    const updatedWorkerAssignments = [...assignmentToUpdate.assignments, newWorkerAssignment];
-    const newTotal = updatedWorkerAssignments.reduce((sum, wa) => sum + wa.paymentAmount, 0);
-
-    updateAssignment.mutate({
-      id: assignmentId,
+    addWorker.mutate({
+      assignmentId,
       payload: {
-        assignments: updatedWorkerAssignments,
-        totalAmount: newTotal,
-      }
+        employeeId: addWorkerId,
+        unitsCompleted: unitsNum,
+      },
     });
 
     setAddWorkerForId(null);
@@ -344,8 +310,14 @@ export default function DailyAssignmentComponent() {
                   <select
                     value={newFormEstateId}
                     onChange={(e) => {
-                      setNewFormEstateId(e.target.value);
-                      setNewFormSectionId("");
+                      const estId = e.target.value;
+                      setNewFormEstateId(estId);
+                      const selectedEst = estates.find((est) => est.id === estId);
+                      if (selectedEst && (!selectedEst.sections || selectedEst.sections.length === 0)) {
+                        setNewFormSectionId("no-section");
+                      } else {
+                        setNewFormSectionId("");
+                      }
                     }}
                     className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm outline-none cursor-pointer text-gray-800"
                     required
@@ -374,11 +346,17 @@ export default function DailyAssignmentComponent() {
                     required
                   >
                     <option value="">Select section</option>
-                    {formSections.map((sec) => (
-                      <option key={sec.id} value={sec.id}>
-                        {sec.name}
-                      </option>
-                    ))}
+                    {formSections.length > 0 ? (
+                      formSections.map((sec) => (
+                        <option key={sec.id} value={sec.id}>
+                          {sec.name}
+                        </option>
+                      ))
+                    ) : (
+                      newFormEstateId && (
+                        <option value="no-section">No Section</option>
+                      )
+                    )}
                   </select>
                 </div>
 
