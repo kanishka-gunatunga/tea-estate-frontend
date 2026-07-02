@@ -63,7 +63,7 @@ export default function TVDashboard() {
   const todayHarvestKg = useMemo(() => {
     // Approved Leaf Plucking assignments on June 9, 2026
     return estateAssignments
-      .filter((da) => da.date === mockToday && da.serviceId === "service-6" && da.status === "approved")
+      .filter((da) => da.date === mockToday && da.unitType === "KG" && da.status === "approved")
       .reduce((sum, da) => {
         return sum + da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
       }, 0);
@@ -72,7 +72,7 @@ export default function TVDashboard() {
   const monthHarvestKg = useMemo(() => {
     // Approved Leaf Plucking assignments in June 2026
     return estateAssignments
-      .filter((da) => da.date.startsWith("2026-06") && da.serviceId === "service-6" && da.status === "approved")
+      .filter((da) => da.date.startsWith("2026-06") && da.unitType === "KG" && da.status === "approved")
       .reduce((sum, da) => {
         return sum + da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
       }, 0);
@@ -114,7 +114,7 @@ export default function TVDashboard() {
     // In June 2026
     return activeEstate.sections.map((section: any) => {
       const pluckSum = estateAssignments
-        .filter((da) => da.sectionId === section.id && da.serviceId === "service-6" && da.status === "approved" && da.date.startsWith("2026-06"))
+        .filter((da) => da.sectionId === section.id && da.unitType === "KG" && da.status === "approved" && da.date.startsWith("2026-06"))
         .reduce((sum, da) => {
           return sum + da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
         }, 0);

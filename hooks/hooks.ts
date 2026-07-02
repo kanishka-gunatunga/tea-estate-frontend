@@ -204,7 +204,14 @@ export function useCreateAssignmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: any) => assignmentService.create(payload),
-    onSuccess: () => {
+    onSuccess: (newAssignment) => {
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return [newAssignment];
+        if (Array.isArray(old)) {
+          return [newAssignment, ...old];
+        }
+        return old;
+      });
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });
@@ -215,7 +222,16 @@ export function useUpdateAssignmentMutation() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: any }) =>
       assignmentService.update(id, payload),
-    onSuccess: () => {
+    onSuccess: (updatedAssignment) => {
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((item: any) =>
+            item.id === updatedAssignment.id ? updatedAssignment : item
+          );
+        }
+        return old;
+      });
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });
@@ -225,7 +241,28 @@ export function useDeleteAssignmentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => assignmentService.delete(id),
-    onSuccess: () => {
+    onMutate: async (deletedId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["assignments"] });
+      // Snapshot the previous assignments
+      const previousAssignments = queryClient.getQueryData(["assignments"]);
+      // Optimistically remove from all active assignment caches
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.filter((item: any) => item.id !== deletedId);
+        }
+        return old;
+      });
+      return { previousAssignments };
+    },
+    onError: (err, deletedId, context) => {
+      // Rollback to snapshotted state on failure
+      if (context?.previousAssignments) {
+        queryClient.setQueriesData({ queryKey: ["assignments"] }, context.previousAssignments);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });
@@ -236,7 +273,16 @@ export function useUpdateAssignmentStatusMutation() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       assignmentService.updateStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (updatedAssignment) => {
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((item: any) =>
+            item.id === updatedAssignment.id ? updatedAssignment : item
+          );
+        }
+        return old;
+      });
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });
@@ -247,7 +293,16 @@ export function useAddWorkerMutation() {
   return useMutation({
     mutationFn: ({ assignmentId, payload }: { assignmentId: string; payload: any }) =>
       assignmentService.addWorker(assignmentId, payload),
-    onSuccess: () => {
+    onSuccess: (updatedAssignment) => {
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((item: any) =>
+            item.id === updatedAssignment.id ? updatedAssignment : item
+          );
+        }
+        return old;
+      });
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });
@@ -265,7 +320,16 @@ export function useUpdateWorkerMutation() {
       employeeId: string;
       payload: any;
     }) => assignmentService.updateWorker(assignmentId, employeeId, payload),
-    onSuccess: () => {
+    onSuccess: (updatedAssignment) => {
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((item: any) =>
+            item.id === updatedAssignment.id ? updatedAssignment : item
+          );
+        }
+        return old;
+      });
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });
@@ -276,7 +340,16 @@ export function useRemoveWorkerMutation() {
   return useMutation({
     mutationFn: ({ assignmentId, employeeId }: { assignmentId: string; employeeId: string }) =>
       assignmentService.removeWorker(assignmentId, employeeId),
-    onSuccess: () => {
+    onSuccess: (updatedAssignment) => {
+      queryClient.setQueriesData({ queryKey: ["assignments"] }, (old: any) => {
+        if (!old) return old;
+        if (Array.isArray(old)) {
+          return old.map((item: any) =>
+            item.id === updatedAssignment.id ? updatedAssignment : item
+          );
+        }
+        return old;
+      });
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
   });

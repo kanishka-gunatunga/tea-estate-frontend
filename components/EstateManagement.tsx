@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-import { useEstatesQuery, useCreateEstateMutation, useUpdateEstateMutation, useDeleteEstateMutation, useCreateSectionMutation, useUpdateSectionMutation, useDeleteSectionMutation } from "@/hooks/hooks";
+import { useEstatesQuery, useCreateEstateMutation, useUpdateEstateMutation, useDeleteEstateMutation, useCreateSectionMutation, useUpdateSectionMutation, useDeleteSectionMutation, useUsersQuery } from "@/hooks/hooks";
 
 export interface Section {
   id: string;
@@ -25,6 +25,11 @@ export interface Estate {
 export default function EstateManagement() {
   const { data: serverEstates, isLoading } = useEstatesQuery();
   const estates = (serverEstates as Estate[]) || [];
+  const { data: serverUsers } = useUsersQuery();
+  const users = (serverUsers as any[]) || [];
+
+  const planters = users.filter((u) => u.role === "Planter");
+  const supervisors = users.filter((u) => u.role === "Supervisor");
 
   const createEstate = useCreateEstateMutation();
   const updateEstate = useUpdateEstateMutation();
@@ -50,8 +55,8 @@ export default function EstateManagement() {
   const [estateMapsLink, setEstateMapsLink] = useState("");
   const [estateArea, setEstateArea] = useState<number | "">("");
   const [estateEst, setEstateEst] = useState<number | "">("");
-  const [estatePlanter, setEstatePlanter] = useState("Carter Bator");
-  const [estateSupervisor, setEstateSupervisor] = useState("Carter Bator");
+  const [estatePlanter, setEstatePlanter] = useState("");
+  const [estateSupervisor, setEstateSupervisor] = useState("");
   const [estateStatus, setEstateStatus] = useState<"active" | "inactive">("active");
   const [estateFormError, setEstateFormError] = useState("");
 
@@ -106,8 +111,10 @@ export default function EstateManagement() {
       setEstateMapsLink("");
       setEstateArea("");
       setEstateEst("");
-      setEstatePlanter("Carter Bator");
-      setEstateSupervisor("Carter Bator");
+      const activePlanters = users.filter((u) => u.role === "Planter" && u.status === "active");
+      const activeSupervisors = users.filter((u) => u.role === "Supervisor" && u.status === "active");
+      setEstatePlanter(activePlanters.length > 0 ? activePlanters[0].name : "");
+      setEstateSupervisor(activeSupervisors.length > 0 ? activeSupervisors[0].name : "");
       setEstateStatus("active");
     }
     setEstateFormError("");
@@ -633,9 +640,15 @@ export default function EstateManagement() {
                     onChange={(e) => setEstatePlanter(e.target.value)}
                     className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
                   >
-                    <option value="Carter Bator">Carter Bator</option>
-                    <option value="Alistair Finch">Alistair Finch</option>
-                    <option value="Saman Silva">Saman Silva</option>
+                    <option value="">Select Planter</option>
+                    {(editingEstate
+                      ? planters.filter((p) => p.status === "active" || p.name === estatePlanter)
+                      : planters.filter((p) => p.status === "active")
+                    ).map((p) => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex flex-col">
@@ -647,9 +660,15 @@ export default function EstateManagement() {
                     onChange={(e) => setEstateSupervisor(e.target.value)}
                     className="w-full h-10 border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 bg-white rounded-lg px-3 text-sm text-black outline-none transition-all cursor-pointer"
                   >
-                    <option value="Carter Bator">Carter Bator</option>
-                    <option value="Kasun Perera">Kasun Perera</option>
-                    <option value="Nimal Bandara">Nimal Bandara</option>
+                    <option value="">Select Supervisor</option>
+                    {(editingEstate
+                      ? supervisors.filter((s) => s.status === "active" || s.name === estateSupervisor)
+                      : supervisors.filter((s) => s.status === "active")
+                    ).map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

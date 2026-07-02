@@ -30,6 +30,7 @@ export default function EmployeeManagement() {
   const deleteEmployee = useDeleteEmployeeMutation();
   // Get categories dynamically from services list
   const SERVICE_CATEGORIES = services.map((s) => s.name);
+
   // Filter/Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [estateFilter, setEstateFilter] = useState("all");
@@ -50,6 +51,16 @@ export default function EmployeeManagement() {
   const [empEstateId, setEmpEstateId] = useState("");
   const [empStatus, setEmpStatus] = useState<"active" | "inactive">("active");
   const [formError, setFormError] = useState("");
+
+  // Service categories to display in the modal form
+  const formServiceCategories = editingEmployee
+    ? Array.from(
+        new Set([
+          ...services.filter((s) => s.status === "active").map((s) => s.name),
+          ...empCategories,
+        ])
+      )
+    : services.filter((s) => s.status === "active").map((s) => s.name);
 
   // Statistics calculation
   const totalEmployeesCount = employees.length;
@@ -112,7 +123,8 @@ export default function EmployeeManagement() {
       setEmpGender("Male");
       setEmpCategories([]);
       setEmpNic("");
-      setEmpEstateId(estates.length > 0 ? estates[0].id : "");
+      const activeEstates = estates.filter((est) => est.status === "active");
+      setEmpEstateId(activeEstates.length > 0 ? activeEstates[0].id : "");
       setEmpStatus("active");
     }
     setFormError("");
@@ -129,6 +141,14 @@ export default function EmployeeManagement() {
     if (empCategories.length === 0) {
       setFormError("Please select at least one Service Category.");
       return;
+    }
+
+    if (empPhone) {
+      const phoneRegex = /^(?:\+94|0)\d{9}$/;
+      if (!phoneRegex.test(empPhone)) {
+        setFormError("Phone number must be in +94712345678 or 0712345678 format.");
+        return;
+      }
     }
 
     if (editingEmployee) {
@@ -152,7 +172,7 @@ export default function EmployeeManagement() {
         id: empId || `EMP${String(employees.length + 1).padStart(3, "0")}`,
         name: empName,
         gender: empGender,
-        phone: empPhone || "+94 77 000 0000",
+        phone: empPhone || "+94770000000",
         estateId: empEstateId,
         serviceCategories: empCategories,
         nic: empNic,
@@ -511,7 +531,7 @@ export default function EmployeeManagement() {
                   </label>
                   <input
                     type="text"
-                    placeholder="+94 77 000 0000"
+                    placeholder="e.g. +94712345678 or 0712345678"
                     value={empPhone}
                     onChange={(e) => setEmpPhone(e.target.value)}
                     className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
@@ -539,7 +559,7 @@ export default function EmployeeManagement() {
                   Service Categories <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-col gap-2.5 p-3 border border-gray-200 rounded-lg bg-[#F9FAFB] max-h-32 overflow-y-auto">
-                  {SERVICE_CATEGORIES.map((cat) => {
+                  {formServiceCategories.map((cat) => {
                     const isChecked = empCategories.includes(cat);
                     return (
                       <label key={cat} className="flex items-center gap-2.5 text-xs text-gray-700 cursor-pointer select-none">
@@ -581,7 +601,10 @@ export default function EmployeeManagement() {
                     className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3 text-sm text-gray-900 outline-none transition-all cursor-pointer"
                   >
                     <option value="">Select Estate</option>
-                    {estates.map((est) => (
+                    {(editingEmployee
+                      ? estates.filter((est) => est.status === "active" || est.id === empEstateId)
+                      : estates.filter((est) => est.status === "active")
+                    ).map((est) => (
                       <option key={est.id} value={est.id}>
                         {est.name}
                       </option>

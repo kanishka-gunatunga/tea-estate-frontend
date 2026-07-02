@@ -75,7 +75,8 @@ export default function UserManagement() {
       setUserEmail("");
       setUserPhone("");
       setUserRole("Supervisor");
-      setUserEstateId(estates.length > 0 ? estates[0].id : "");
+      const activeEstates = estates.filter((est) => est.status === "active");
+      setUserEstateId(activeEstates.length > 0 ? activeEstates[0].id : "");
       setUserStatus("active");
     }
     setFormError("");
@@ -87,6 +88,14 @@ export default function UserManagement() {
     if (!userName || !userEmail) {
       setFormError("Full Name and Email Address are required fields.");
       return;
+    }
+
+    if (userPhone) {
+      const phoneRegex = /^(?:\+94|0)\d{9}$/;
+      if (!phoneRegex.test(userPhone)) {
+        setFormError("Phone number must be in +94712345678 or 0712345678 format.");
+        return;
+      }
     }
 
     if (editingUser) {
@@ -107,7 +116,7 @@ export default function UserManagement() {
       const newUser = {
         name: userName,
         email: userEmail,
-        phone: userPhone || "+94 77 000 0000",
+        phone: userPhone || "+94770000000",
         role: userRole,
         registeredDate: new Date().toISOString().split("T")[0],
         status: userStatus,
@@ -454,7 +463,7 @@ export default function UserManagement() {
                   </label>
                   <input
                     type="text"
-                    placeholder="+94 77 000 0000"
+                    placeholder="e.g. +94712345678 or 0712345678"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
                     className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3.5 text-sm text-gray-900 outline-none transition-all placeholder-gray-400"
@@ -487,7 +496,10 @@ export default function UserManagement() {
                   className="w-full h-10 bg-white border border-gray-300 focus:border-[#00A63E] focus:ring-2 focus:ring-emerald-100 rounded-lg px-3 text-sm text-gray-900 outline-none transition-all cursor-pointer"
                 >
                   <option value="">None</option>
-                  {estates.map((est) => (
+                  {(editingUser
+                    ? estates.filter((est) => est.status === "active" || est.id === userEstateId)
+                    : estates.filter((est) => est.status === "active")
+                  ).map((est) => (
                     <option key={est.id} value={est.id}>
                       {est.name}
                     </option>

@@ -40,7 +40,6 @@ interface ExpenseReportRow {
   sectionOrCategory: string;
   description: string;
   amount: number;
-  status: string;
 }
 
 interface HarvestReportRow {
@@ -214,7 +213,6 @@ export default function Reports() {
         sectionOrCategory: section?.name ? `${section.name} / ${ex.category}` : ex.category,
         description: ex.description,
         amount: ex.amount,
-        status: ex.status,
       });
     });
     return list.sort((a, b) => b.date.localeCompare(a.date));
@@ -348,14 +346,13 @@ export default function Reports() {
       ]);
     } else if (activeFilters.reportType === "expenses") {
       const data = reportData as ExpenseReportRow[];
-      headers = ["Date", "Estate", "Category/Section", "Description", "Amount (LKR)", "Status"];
+      headers = ["Date", "Estate", "Category/Section", "Description", "Amount (LKR)"];
       rows = data.map((d) => [
         d.date,
         d.estateName,
         d.sectionOrCategory,
         d.description,
         d.amount.toString(),
-        d.status,
       ]);
     } else if (activeFilters.reportType === "harvest") {
       const data = reportData as HarvestReportRow[];
@@ -451,17 +448,16 @@ export default function Reports() {
     } else if (activeFilters.reportType === "expenses") {
       const data = reportData as ExpenseReportRow[];
       title = "Expense Report";
-      headers = ["Date", "Estate", "Category / Section", "Description", "Amount (LKR)", "Status"];
+      headers = ["Date", "Estate", "Category / Section", "Description", "Amount (LKR)"];
       rows = data.map((d) => [
         d.date,
         d.estateName,
         d.sectionOrCategory,
         d.description,
         d.amount.toLocaleString(),
-        d.status,
       ]);
       const totalAmount = data.reduce((sum, d) => sum + d.amount, 0);
-      footerRow = ["Total", "", "", "", `LKR ${totalAmount.toLocaleString()}`, ""];
+      footerRow = ["Total", "", "", "", `LKR ${totalAmount.toLocaleString()}`];
     } else if (activeFilters.reportType === "harvest") {
       const data = reportData as HarvestReportRow[];
       title = "Harvest Summary Report";
@@ -581,7 +577,6 @@ export default function Reports() {
         } : {}),
         ...((activeFilters.reportType === "expenses") ? {
           4: { halign: "right" }, // Amount
-          5: { halign: "center" }, // Status
         } : {}),
         ...((activeFilters.reportType === "harvest") ? {
           2: { halign: "right" }, // Total Harvest
@@ -590,6 +585,14 @@ export default function Reports() {
         } : {}),
       },
       margin: { left: 15, right: 15 },
+      didParseCell: (data) => {
+        if (data.cell.section === "foot") {
+          const colStyle = data.table.styles.columnStyles?.[data.column.index];
+          if (colStyle && colStyle.halign) {
+            data.cell.styles.halign = colStyle.halign;
+          }
+        }
+      },
       didDrawPage: (data) => {
         // Add footer to each page
         doc.setFont("helvetica", "normal");
@@ -995,8 +998,7 @@ export default function Reports() {
                           <th className="py-3 px-3">Estate</th>
                           <th className="py-3 px-3">Section / Category</th>
                           <th className="py-3 px-3">Description</th>
-                          <th className="py-3 px-3 text-right">Amount</th>
-                          <th className="py-3 px-4 text-center">Status</th>
+                          <th className="py-3 px-4 text-right">Amount</th>
                         </>
                       )}
                       {activeFilters.reportType === "harvest" && (
@@ -1049,19 +1051,7 @@ export default function Reports() {
                             <td className="py-3.5 px-3 text-[#364153] max-w-[200px] truncate" title={(row as ExpenseReportRow).description}>
                               {(row as ExpenseReportRow).description}
                             </td>
-                            <td className="py-3.5 px-3 text-[#CA3500] text-right font-mono font-semibold">{formatCurrency((row as ExpenseReportRow).amount)}</td>
-                            <td className="py-3.5 px-4 text-center">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${(row as ExpenseReportRow).status === "approved"
-                                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                  : (row as ExpenseReportRow).status === "rejected"
-                                    ? "bg-red-50 border-red-200 text-red-700"
-                                    : "bg-amber-50 border-amber-200 text-amber-700"
-                                  }`}
-                              >
-                                {(row as ExpenseReportRow).status}
-                              </span>
-                            </td>
+                            <td className="py-3.5 px-4 text-[#CA3500] text-right font-mono font-semibold">{formatCurrency((row as ExpenseReportRow).amount)}</td>
                           </>
                         )}
 
