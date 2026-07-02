@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Estate } from "./EstateManagement";
 import { Service } from "./ServiceManagement";
 
+import { useEmployeesQuery, useEstatesQuery, useServicesQuery, useCreateEmployeeMutation, useUpdateEmployeeMutation, useDeleteEmployeeMutation } from "@/hooks/hooks";
+
 // --- Types ---
 export interface Employee {
   id: string; // e.g. EMP001
@@ -14,19 +16,18 @@ export interface Employee {
   status: "active" | "inactive";
 }
 
-interface EmployeeManagementProps {
-  employees: Employee[];
-  setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
-  estates: Estate[];
-  services: Service[];
-}
+export default function EmployeeManagement() {
+  const { data: serverEmployees } = useEmployeesQuery();
+  const { data: serverEstates } = useEstatesQuery();
+  const { data: serverServices } = useServicesQuery();
+  
+  const employees = (serverEmployees as Employee[]) || [];
+  const estates = (serverEstates as Estate[]) || [];
+  const services = (serverServices as Service[]) || [];
 
-export default function EmployeeManagement({
-  employees,
-  setEmployees,
-  estates,
-  services,
-}: EmployeeManagementProps) {
+  const createEmployee = useCreateEmployeeMutation();
+  const updateEmployee = useUpdateEmployeeMutation();
+  const deleteEmployee = useDeleteEmployeeMutation();
   // Get categories dynamically from services list
   const SERVICE_CATEGORIES = services.map((s) => s.name);
   // Filter/Search states
@@ -132,26 +133,22 @@ export default function EmployeeManagement({
 
     if (editingEmployee) {
       // Edit
-      setEmployees((prev) =>
-        prev.map((e) =>
-          e.id === editingEmployee.id
-            ? {
-              ...e,
-              name: empName,
-              id: empId,
-              phone: empPhone,
-              gender: empGender,
-              serviceCategories: empCategories,
-              nic: empNic,
-              estateId: empEstateId,
-              status: empStatus,
-            }
-            : e
-        )
-      );
+      updateEmployee.mutate({
+        id: editingEmployee.id,
+        payload: {
+          name: empName,
+          id: empId,
+          phone: empPhone,
+          gender: empGender,
+          serviceCategories: empCategories,
+          nic: empNic,
+          estateId: empEstateId,
+          status: empStatus,
+        }
+      });
     } else {
       // Add
-      const newEmp: Employee = {
+      const newEmp = {
         id: empId || `EMP${String(employees.length + 1).padStart(3, "0")}`,
         name: empName,
         gender: empGender,
@@ -161,7 +158,7 @@ export default function EmployeeManagement({
         nic: empNic,
         status: empStatus,
       };
-      setEmployees((prev) => [...prev, newEmp]);
+      createEmployee.mutate(newEmp);
     }
 
     setIsEmployeeModalOpen(false);
@@ -170,7 +167,7 @@ export default function EmployeeManagement({
   // Delete Employee
   const handleDeleteEmployee = (empIdToDelete: string) => {
     if (confirm("Are you sure you want to delete this employee?")) {
-      setEmployees((prev) => prev.filter((e) => e.id !== empIdToDelete));
+      deleteEmployee.mutate(empIdToDelete);
     }
   };
 

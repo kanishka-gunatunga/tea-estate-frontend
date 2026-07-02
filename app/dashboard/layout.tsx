@@ -1,11 +1,9 @@
 "use client";
 
-import { DashboardStateProvider, useDashboardContext } from "./context";
 import Sidebar from "@/components/Sidebar";
 import { usePathname } from "next/navigation";
 
-function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
-  const { profile } = useDashboardContext();
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
 
   // Map sub-route paths to Sidebar activeView enum values
@@ -41,7 +39,6 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       <Sidebar
         activeView={activeView}
         onViewChange={() => {}}
-        profile={profile}
       />
 
       {/* Main Content Area */}
@@ -49,13 +46,5 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </div>
-  );
-}
-
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <DashboardStateProvider>
-      <DashboardLayoutInner>{children}</DashboardLayoutInner>
-    </DashboardStateProvider>
   );
 }

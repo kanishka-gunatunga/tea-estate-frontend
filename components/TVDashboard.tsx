@@ -2,10 +2,20 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { ChevronDown, Leaf, Users, Wallet, DollarSign, Calendar, Clock, ClipboardList, TrendingUp } from "lucide-react";
-import { useDashboardContext } from "@/app/dashboard/context";
+import { useEstatesQuery, useAssignmentsQuery, useExpensesQuery, useEventsQuery, useEmployeesQuery } from "@/hooks/hooks";
 
 export default function TVDashboard() {
-  const { estates, assignments, expenses, events, employees } = useDashboardContext();
+  const { data: serverEstates } = useEstatesQuery();
+  const { data: serverAssignments } = useAssignmentsQuery();
+  const { data: serverExpenses } = useExpensesQuery();
+  const { data: serverEvents } = useEventsQuery();
+  const { data: serverEmployees } = useEmployeesQuery();
+
+  const estates = (serverEstates as any[]) || [];
+  const assignments = (serverAssignments as any[]) || [];
+  const expenses = (serverExpenses as any[]) || [];
+  const events = (serverEvents as any[]) || [];
+  const employees = (serverEmployees as any[]) || [];
 
   // Selected Estate state - default to Greenleaf Tea Estate
   const [selectedEstateId, setSelectedEstateId] = useState<string>("estate-1");
@@ -55,7 +65,7 @@ export default function TVDashboard() {
     return estateAssignments
       .filter((da) => da.date === mockToday && da.serviceId === "service-6" && da.status === "approved")
       .reduce((sum, da) => {
-        return sum + da.assignments.reduce((s, a) => s + a.unitsCompleted, 0);
+        return sum + da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
       }, 0);
   }, [estateAssignments]);
 
@@ -64,7 +74,7 @@ export default function TVDashboard() {
     return estateAssignments
       .filter((da) => da.date.startsWith("2026-06") && da.serviceId === "service-6" && da.status === "approved")
       .reduce((sum, da) => {
-        return sum + da.assignments.reduce((s, a) => s + a.unitsCompleted, 0);
+        return sum + da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
       }, 0);
   }, [estateAssignments]);
 
@@ -102,11 +112,11 @@ export default function TVDashboard() {
     if (!activeEstate || !activeEstate.sections) return [];
     
     // In June 2026
-    return activeEstate.sections.map((section) => {
+    return activeEstate.sections.map((section: any) => {
       const pluckSum = estateAssignments
         .filter((da) => da.sectionId === section.id && da.serviceId === "service-6" && da.status === "approved" && da.date.startsWith("2026-06"))
         .reduce((sum, da) => {
-          return sum + da.assignments.reduce((s, a) => s + a.unitsCompleted, 0);
+          return sum + da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
         }, 0);
 
       return {

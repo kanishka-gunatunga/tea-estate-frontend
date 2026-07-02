@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "../services/authService";
 
+import { useProfileQuery, useUpdateProfileMutation } from "@/hooks/hooks";
+
 // --- Types ---
 export interface UserProfile {
   name: string;
@@ -13,12 +15,20 @@ export interface UserProfile {
   profilePhoto?: string | null;
 }
 
-interface ProfileProps {
-  profile: UserProfile;
-  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
-}
+export default function Profile() {
+  const { data: serverProfile } = useProfileQuery();
+  const updateProfile = useUpdateProfileMutation();
 
-export default function Profile({ profile, setProfile }: ProfileProps) {
+  const profile = (serverProfile as UserProfile) || {
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    role: "System Administrator",
+    memberSince: "Jan 2026",
+    profilePhoto: null,
+  };
+
   const router = useRouter();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,13 +63,13 @@ export default function Profile({ profile, setProfile }: ProfileProps) {
       return;
     }
 
-    setProfile((prev) => ({
-      ...prev,
+    updateProfile.mutate({
+      ...profile,
       name: editName,
       email: editEmail,
       phone: editPhone,
       address: editAddress,
-    }));
+    });
 
     setIsEditModalOpen(false);
     setEditError("");
@@ -133,10 +143,10 @@ export default function Profile({ profile, setProfile }: ProfileProps) {
     try {
       setIsUploadingPhoto(true);
       const updatedProfile = await authService.uploadProfilePhoto(file);
-      setProfile((prev) => ({
-        ...prev,
+      updateProfile.mutate({
+        ...profile,
         profilePhoto: updatedProfile.profilePhoto,
-      }));
+      });
     } catch (error) {
       console.error("Failed to upload photo:", error);
       alert("Failed to upload photo. Please try again.");

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useServicesQuery, useCreateServiceMutation, useUpdateServiceMutation, useDeleteServiceMutation } from "@/hooks/hooks";
+
 export interface Service {
   id: string;
   name: string;
@@ -9,12 +11,13 @@ export interface Service {
   unitType: string;
 }
 
-interface ServiceManagementProps {
-  services: Service[];
-  setServices: React.Dispatch<React.SetStateAction<Service[]>>;
-}
+export default function ServiceManagement() {
+  const { data: serverServices } = useServicesQuery();
+  const services = (serverServices as Service[]) || [];
 
-export default function ServiceManagement({ services, setServices }: ServiceManagementProps) {
+  const createService = useCreateServiceMutation();
+  const updateService = useUpdateServiceMutation();
+  const deleteService = useDeleteServiceMutation();
   // Search query filter state
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -79,31 +82,26 @@ export default function ServiceManagement({ services, setServices }: ServiceMana
 
     if (editingService) {
       // Edit mode
-      setServices((prev) =>
-        prev.map((srv) =>
-          srv.id === editingService.id
-            ? {
-                ...srv,
-                name: serviceName,
-                description: serviceDesc,
-                status: serviceStatus,
-                unitType: serviceUnit,
-                rate: rateNum,
-              }
-            : srv
-        )
-      );
+      updateService.mutate({
+        id: editingService.id,
+        payload: {
+          name: serviceName,
+          description: serviceDesc,
+          status: serviceStatus,
+          unitType: serviceUnit,
+          rate: rateNum,
+        }
+      });
     } else {
       // Add mode
-      const newService: Service = {
-        id: `service-${Date.now()}`,
+      const newService = {
         name: serviceName,
         description: serviceDesc,
         status: serviceStatus,
         unitType: serviceUnit,
         rate: rateNum,
       };
-      setServices((prev) => [...prev, newService]);
+      createService.mutate(newService);
     }
 
     setIsModalOpen(false);
@@ -112,7 +110,7 @@ export default function ServiceManagement({ services, setServices }: ServiceMana
   // Delete Service handler
   const handleDeleteService = (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete the "${name}" service?`)) {
-      setServices((prev) => prev.filter((srv) => srv.id !== id));
+      deleteService.mutate(id);
     }
   };
 

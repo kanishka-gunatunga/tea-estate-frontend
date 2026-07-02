@@ -15,10 +15,20 @@ import {
   DollarSign, 
   CalendarDays 
 } from "lucide-react";
-import { useDashboardContext } from "@/app/dashboard/context";
+import { useEstatesQuery, useAssignmentsQuery, useExpensesQuery, useEventsQuery, useEmployeesQuery } from "@/hooks/hooks";
 
 export default function Dashboard() {
-  const { estates, assignments, expenses, events, employees } = useDashboardContext();
+  const { data: serverEstates } = useEstatesQuery();
+  const { data: serverAssignments } = useAssignmentsQuery();
+  const { data: serverExpenses } = useExpensesQuery();
+  const { data: serverEvents } = useEventsQuery();
+  const { data: serverEmployees } = useEmployeesQuery();
+
+  const estates = (serverEstates as any[]) || [];
+  const assignments = (serverAssignments as any[]) || [];
+  const expenses = (serverExpenses as any[]) || [];
+  const events = (serverEvents as any[]) || [];
+  const employees = (serverEmployees as any[]) || [];
 
   // Filter states
   const [selectedEstateId, setSelectedEstateId] = useState<string>("estate-1"); // Defaults to Greenleaf Tea Estate
@@ -88,7 +98,7 @@ export default function Dashboard() {
     return filteredAssignments
       .filter((da) => da.serviceId === "service-6" && da.status === "approved")
       .reduce((sum, da) => {
-        const daSum = da.assignments.reduce((s, a) => s + a.unitsCompleted, 0);
+        const daSum = da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
         return sum + daSum;
       }, 0);
   }, [filteredAssignments]);
@@ -220,12 +230,12 @@ export default function Dashboard() {
   const harvestBySection = useMemo(() => {
     if (!activeEstate || !activeEstate.sections) return [];
     
-    return activeEstate.sections.map((section) => {
+    return activeEstate.sections.map((section: any) => {
       // Sum unitsCompleted for this section's leaf pluck assignments in filtered range
       const pluckSum = filteredAssignments
         .filter((da) => da.sectionId === section.id && da.serviceId === "service-6" && da.status === "approved")
         .reduce((sum, da) => {
-          const daSum = da.assignments.reduce((s, a) => s + a.unitsCompleted, 0);
+          const daSum = da.assignments.reduce((s: number, a: any) => s + a.unitsCompleted, 0);
           return sum + daSum;
         }, 0);
 
@@ -666,7 +676,7 @@ export default function Dashboard() {
             {/* List with Progress Bars */}
             <div className="flex-1 mt-5 flex flex-col gap-4">
               {harvestBySection.length > 0 ? (
-                harvestBySection.map((sec) => {
+                harvestBySection.map((sec: any) => {
                   // We scale relative to a max target of 120 KG (Section C is 112.5, which will be ~93%)
                   const percentage = Math.min((sec.amount / 120) * 100, 100);
                   

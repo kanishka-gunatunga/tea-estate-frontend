@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
+import { useEstatesQuery, useCreateEstateMutation, useUpdateEstateMutation, useDeleteEstateMutation, useCreateSectionMutation, useUpdateSectionMutation, useDeleteSectionMutation } from "@/hooks/hooks";
+
 export interface Section {
   id: string;
   name: string;
@@ -20,12 +22,16 @@ export interface Estate {
   sections: Section[];
 }
 
-interface EstateManagementProps {
-  estates: Estate[];
-  setEstates: React.Dispatch<React.SetStateAction<Estate[]>>;
-}
+export default function EstateManagement() {
+  const { data: serverEstates, isLoading } = useEstatesQuery();
+  const estates = (serverEstates as Estate[]) || [];
 
-export default function EstateManagement({ estates, setEstates }: EstateManagementProps) {
+  const createEstate = useCreateEstateMutation();
+  const updateEstate = useUpdateEstateMutation();
+  const deleteEstate = useDeleteEstateMutation();
+  const createSection = useCreateSectionMutation();
+  const updateSection = useUpdateSectionMutation();
+  const deleteSection = useDeleteSectionMutation();
   const [activeEstateId, setActiveEstateId] = useState<string>(
     estates.length > 0 ? estates[0].id : ""
   );
@@ -125,27 +131,22 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
 
     if (editingEstate) {
       // Edit
-      setEstates((prev) =>
-        prev.map((est) =>
-          est.id === editingEstate.id
-            ? {
-                ...est,
-                name: estateName,
-                location: estateLocation,
-                mapsLink: estateMapsLink || `https://maps.google.com/?q=${encodeURIComponent(estateLocation)}`,
-                area: areaNum,
-                establishedYear: estNum,
-                planter: estatePlanter,
-                supervisor: estateSupervisor,
-                status: estateStatus,
-              }
-            : est
-        )
-      );
+      updateEstate.mutate({
+        id: editingEstate.id,
+        payload: {
+          name: estateName,
+          location: estateLocation,
+          mapsLink: estateMapsLink || `https://maps.google.com/?q=${encodeURIComponent(estateLocation)}`,
+          area: areaNum,
+          establishedYear: estNum,
+          planter: estatePlanter,
+          supervisor: estateSupervisor,
+          status: estateStatus,
+        }
+      });
     } else {
       // Add
-      const newEstate: Estate = {
-        id: `estate-${Date.now()}`,
+      const newEstate = {
         name: estateName,
         location: estateLocation,
         mapsLink: estateMapsLink || `https://maps.google.com/?q=${encodeURIComponent(estateLocation)}`,
@@ -156,8 +157,13 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
         status: estateStatus,
         sections: [],
       };
-      setEstates((prev) => [...prev, newEstate]);
-      setActiveEstateId(newEstate.id);
+      createEstate.mutate(newEstate, {
+        onSuccess: (data: any) => {
+          if (data && data.id) {
+            setActiveEstateId(data.id);
+          }
+        }
+      });
     }
 
     setIsEstateModalOpen(false);
@@ -167,11 +173,14 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
   const handleDeleteEstate = (estateId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Avoid selecting card
     if (confirm("Are you sure you want to delete this estate?")) {
-      const remaining = estates.filter((est) => est.id !== estateId);
-      setEstates(remaining);
-      if (activeEstateId === estateId && remaining.length > 0) {
-        setActiveEstateId(remaining[0].id);
-      }
+      deleteEstate.mutate(estateId, {
+        onSuccess: () => {
+          const remaining = estates.filter((est) => est.id !== estateId);
+          if (activeEstateId === estateId && remaining.length > 0) {
+            setActiveEstateId(remaining[0].id);
+          }
+        }
+      });
     }
   };
 
@@ -206,35 +215,25 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
 
     if (editingSection) {
       // Edit
-      setEstates((prev) =>
-        prev.map((est) =>
-          est.id === editingSection.estateId
-            ? {
-                ...est,
-                sections: est.sections.map((sec) =>
-                  sec.id === editingSection.section.id
-                    ? { ...sec, name: sectionName, area: areaNum, description: sectionDesc }
-                    : sec
-                ),
-              }
-            : est
-        )
-      );
+      updateSection.mutate({
+        estateId: editingSection.estateId,
+        sectionId: editingSection.section.id,
+        payload: {
+          name: sectionName,
+          area: areaNum,
+          description: sectionDesc,
+        }
+      });
     } else {
       // Add
-      const newSec: Section = {
-        id: `sec-${Date.now()}`,
-        name: sectionName,
-        area: areaNum,
-        description: sectionDesc,
-      };
-      setEstates((prev) =>
-        prev.map((est) =>
-          est.id === activeEstate.id
-            ? { ...est, sections: [...est.sections, newSec] }
-            : est
-        )
-      );
+      createSection.mutate({
+        estateId: activeEstate.id,
+        payload: {
+          name: sectionName,
+          area: areaNum,
+          description: sectionDesc,
+        }
+      });
     }
 
     setIsSectionModalOpen(false);
@@ -243,13 +242,7 @@ export default function EstateManagement({ estates, setEstates }: EstateManageme
   // Delete Section
   const handleDeleteSection = (sectionId: string) => {
     if (confirm("Are you sure you want to delete this section?") && activeEstate) {
-      setEstates((prev) =>
-        prev.map((est) =>
-          est.id === activeEstate.id
-            ? { ...est, sections: est.sections.filter((sec) => sec.id !== sectionId) }
-            : est
-        )
-      );
+      deleteSection.mutate({ estateId: activeEstate.id, sectionId });
     }
   };
 

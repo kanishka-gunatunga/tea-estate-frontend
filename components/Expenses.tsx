@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Estate } from "./EstateManagement";
 
+import { useExpensesQuery, useEstatesQuery, useCreateExpenseMutation, useUpdateExpenseMutation, useDeleteExpenseMutation } from "@/hooks/hooks";
+
 // --- Types ---
 export interface Expense {
   id: string;
@@ -13,12 +15,6 @@ export interface Expense {
   status: "pending" | "approved" | "rejected";
 }
 
-interface ExpensesProps {
-  expenses: Expense[];
-  setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>;
-  estates: Estate[];
-}
-
 const CATEGORIES = ["Transport", "Tools", "Utilities", "Other"];
 
 const badgeClasses: Record<string, string> = {
@@ -28,7 +24,16 @@ const badgeClasses: Record<string, string> = {
   Other: "bg-[#F9FAFB] border-[#E5E7EB] text-[#364153]",
 };
 
-export default function Expenses({ expenses, setExpenses, estates }: ExpensesProps) {
+export default function Expenses() {
+  const { data: serverExpenses } = useExpensesQuery();
+  const { data: serverEstates } = useEstatesQuery();
+
+  const expenses = (serverExpenses as Expense[]) || [];
+  const estates = (serverEstates as Estate[]) || [];
+
+  const createExpense = useCreateExpenseMutation();
+  const updateExpense = useUpdateExpenseMutation();
+  const deleteExpense = useDeleteExpenseMutation();
   // Search & filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -118,26 +123,21 @@ export default function Expenses({ expenses, setExpenses, estates }: ExpensesPro
 
     if (editingExpense) {
       // Edit
-      setExpenses((prev) =>
-        prev.map((exp) =>
-          exp.id === editingExpense.id
-            ? {
-                ...exp,
-                date: expenseDate,
-                category: expenseCategory,
-                description: expenseDesc,
-                amount: amountNum,
-                estateId: expenseEstateId,
-                sectionId: expenseSectionId || undefined,
-                status: expenseStatus,
-              }
-            : exp
-        )
-      );
+      updateExpense.mutate({
+        id: editingExpense.id,
+        payload: {
+          date: expenseDate,
+          category: expenseCategory,
+          description: expenseDesc,
+          amount: amountNum,
+          estateId: expenseEstateId,
+          sectionId: expenseSectionId || undefined,
+          status: expenseStatus,
+        }
+      });
     } else {
       // Add
-      const newExpense: Expense = {
-        id: `ex-${Date.now()}`,
+      const newExpense = {
         date: expenseDate,
         category: expenseCategory,
         description: expenseDesc,
@@ -146,7 +146,7 @@ export default function Expenses({ expenses, setExpenses, estates }: ExpensesPro
         sectionId: expenseSectionId || undefined,
         status: expenseStatus,
       };
-      setExpenses((prev) => [...prev, newExpense]);
+      createExpense.mutate(newExpense);
     }
 
     setIsModalOpen(false);
@@ -155,7 +155,7 @@ export default function Expenses({ expenses, setExpenses, estates }: ExpensesPro
   // Delete Expense
   const handleDeleteExpense = (id: string, description: string) => {
     if (confirm(`Are you sure you want to delete the expense entry: "${description}"?`)) {
-      setExpenses((prev) => prev.filter((exp) => exp.id !== id));
+      deleteExpense.mutate(id);
     }
   };
 

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, ChartColumn, DollarSign, Settings, SquareUserRound, Users, LayoutGrid, Database, HardDrive } from "lucide-react";
+import { useProfileQuery } from "@/hooks/hooks";
 
 interface SidebarProps {
   activeView:
@@ -30,11 +31,6 @@ interface SidebarProps {
       | "reports"
       | "backups"
   ) => void;
-  profile?: {
-    name: string;
-    role: string;
-    profilePhoto?: string | null;
-  };
 }
 
 type NavView =
@@ -49,8 +45,9 @@ type NavView =
   | "reports"
   | "backups";
 
-export default function Sidebar({ activeView, profile }: SidebarProps) {
+export default function Sidebar({ activeView }: SidebarProps) {
   const router = useRouter();
+  const { data: profile } = useProfileQuery();
 
   const handleLogout = () => {
     if (confirm("Are you sure you want to sign out?")) {
@@ -297,7 +294,7 @@ export default function Sidebar({ activeView, profile }: SidebarProps) {
             />
           ) : (
             <div className="w-8 h-8 bg-[#00A63E] rounded-[10px] flex items-center justify-center font-bold text-xs text-white select-none shrink-0">
-              {profile ? profile.name.split(" ").map((n) => n[0]).join("") : "CB"}
+              {profile ? profile.name.split(" ").map((n: string) => n[0]).join("") : "CB"}
             </div>
           )}
           <div className="flex flex-col min-w-0 flex-1">

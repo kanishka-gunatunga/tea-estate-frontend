@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Estate } from "./EstateManagement";
 
+import { useUsersQuery, useEstatesQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from "@/hooks/hooks";
+
 // --- Types ---
 export interface User {
   id: string;
@@ -13,13 +15,16 @@ export interface User {
   assignedEstateId?: string;
 }
 
-interface UserManagementProps {
-  users: User[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
-  estates: Estate[];
-}
+export default function UserManagement() {
+  const { data: serverUsers } = useUsersQuery();
+  const { data: serverEstates } = useEstatesQuery();
 
-export default function UserManagement({ users, setUsers, estates }: UserManagementProps) {
+  const users = (serverUsers as User[]) || [];
+  const estates = (serverEstates as Estate[]) || [];
+
+  const createUser = useCreateUserMutation();
+  const updateUser = useUpdateUserMutation();
+  const deleteUser = useDeleteUserMutation();
   // Filter/Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -86,25 +91,20 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
 
     if (editingUser) {
       // Edit User
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingUser.id
-            ? {
-              ...u,
-              name: userName,
-              email: userEmail,
-              phone: userPhone,
-              role: userRole,
-              assignedEstateId: userEstateId || undefined,
-              status: userStatus,
-            }
-            : u
-        )
-      );
+      updateUser.mutate({
+        id: editingUser.id,
+        payload: {
+          name: userName,
+          email: userEmail,
+          phone: userPhone,
+          role: userRole,
+          assignedEstateId: userEstateId || undefined,
+          status: userStatus,
+        }
+      });
     } else {
       // Add User
-      const newUser: User = {
-        id: `user-${Date.now()}`,
+      const newUser = {
         name: userName,
         email: userEmail,
         phone: userPhone || "+94 77 000 0000",
@@ -113,7 +113,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
         status: userStatus,
         assignedEstateId: userEstateId || undefined,
       };
-      setUsers((prev) => [...prev, newUser]);
+      createUser.mutate(newUser);
     }
 
     setIsUserModalOpen(false);
@@ -121,7 +121,7 @@ export default function UserManagement({ users, setUsers, estates }: UserManagem
 
   const handleDeleteUser = (userId: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
-      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      deleteUser.mutate(userId);
     }
   };
 
